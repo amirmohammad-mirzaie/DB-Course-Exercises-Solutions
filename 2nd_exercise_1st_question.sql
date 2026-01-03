@@ -208,7 +208,25 @@ DROP TABLE IF EXISTS Users;
 
 -- fisrt solution using directly the commentCount for the posts
 
-SELECT p.id, p.CommentCount, pt.Type from Posts p
+SELECT p.id, p.CommentCount, pt.Type FROM Posts p
 JOIN PostTypes pt ON pt.Id = p.PostTypeId
+WHERE pt.Type = 'Question'
 ORDER BY p.id ASC;
+
+-- second solution using joining tables
+
+
+
+SELECT 
+    p.Id,
+    COUNT(c.Id)
+FROM Posts p
+JOIN PostTypes pt ON pt.Id = p.PostTypeId
+LEFT JOIN Comments c ON c.PostId = p.ID
+WHERE pt.Type = 'Question'
+GROUP BY p.id
+ORDER BY p.id ASC;
+    
+
+
 
