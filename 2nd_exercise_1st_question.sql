@@ -20,7 +20,6 @@ CREATE TABLE Posts (
     Tags TEXT,
     CreationDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     DeletionDate TIMESTAMP,
-    AcceptedAnswerId INT REFERENCES Posts(Id),
     CommentCount INT,
     PostTypeId INT REFERENCES PostTypes(Id),
     OwnerUserId INT REFERENCES Users(Id)
@@ -31,6 +30,17 @@ ADD COLUMN ParentId INT REFERENCES Posts(Id);
 
 ALTER TABLE Posts
 ADD COLUMN AcceptedAnswerId INT REFERENCES Posts(Id);
+
+
+CREATE TABLE PostLinks (
+    Id SERIAL PRIMARY KEY,
+    CreationDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PostId INT REFERENCES Posts(Id),
+    RelatedPostId INT REFERENCES Posts(Id),
+    LinkTypeId INT 
+);
+
+
 
 
 CREATE TABLE Comments (
@@ -59,12 +69,13 @@ CREATE TABLE PostTags(
 );
 
 
-DROP TABLE Comments;
-DROP TABLE PostTags;
-DROP TABLE Posts;
-DROP TABLE PostTypes;
-DROP TABLE Tags;
-
+DROP TABLE IF EXISTS Comments;
+DROP TABLE IF EXISTS PostTags;
+DROP TABLE IF EXISTS Tags;
+DROP TABLE IF EXISTS PostLinks;
+DROP TABLE IF EXISTS Posts;
+DROP TABLE IF EXISTS PostTypes;
+DROP TABLE IF EXISTS Users;
 
 
 ----------------------------
