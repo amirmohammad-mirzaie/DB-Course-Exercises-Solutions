@@ -245,10 +245,13 @@ LIMIT 1;
 
 -- the average of number of answers for a question
 SELECT 
+    pt.Type,
+    p.Id AS PostId,
     pl.id AS PostLinkId,
-    pl.PostId,
-    pl.RelatedPostId,
-    p.id AS PostId
-
-FROM PostLinks pl
-JOIN Posts p ON pl.PostId = p.Id;
+    r.Id AS RelatedPostId,
+    pt1.Type
+FROM PostTypes pt
+JOIN Posts p ON p.PostTypeId = pt.Id
+JOIN PostLinks pl ON p.Id = pl.PostId
+JOIN Posts r ON pl.RelatedPostId = r.Id
+JOIN PostTypes pt1 ON r.PostTypeId = pt1.Id;
