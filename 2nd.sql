@@ -230,3 +230,25 @@ ORDER BY p.id ASC;
 
 
 
+-- The Id of the user who has done the most comments
+SELECT 
+    u.id AS user_id
+
+FROM Users u
+LEFT JOIN Comments c ON c.UserId = u.Id
+GROUP BY u.id
+ORDER BY COUNT(c.id) DESC
+LIMIT 1;
+
+
+
+
+-- the average of number of answers for a question
+SELECT 
+    pl.id AS PostLinkId,
+    pl.PostId,
+    pl.RelatedPostId,
+    p.id AS PostId
+
+FROM PostLinks pl
+JOIN Posts p ON pl.PostId = p.Id;
