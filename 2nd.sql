@@ -119,18 +119,17 @@ INSERT INTO Posts (Id, Body, Title, CreationDate, CommentCount, PostTypeId, Owne
 (14, '<p>Use COALESCE or NULLIF functions to handle NULL values gracefully.</p>', NULL, '2026-01-22 17:50:00', 4, 2, 2, NULL),
 (15, '<p>This bug might be related to the recursive trigger on the users table.</p>', NULL, '2026-01-21 13:15:00', 2, 2, 2, NULL);
 
--- Set ParentId and AcceptedAnswerId for relationships
-UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 11 WHERE Id = 1;  -- Question 1 has accepted answer 11
-UPDATE Posts SET ParentId = 11, AcceptedAnswerId = NULL WHERE Id = 11; -- Answer 11 has parent question 1
-UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 12 WHERE Id = 2;
-UPDATE Posts SET ParentId = 12, AcceptedAnswerId = NULL WHERE Id = 12;
-UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 13 WHERE Id = 3;
-UPDATE Posts SET ParentId = 13, AcceptedAnswerId = NULL WHERE Id = 13;
-UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 14 WHERE Id = 4;
-UPDATE Posts SET ParentId = 14, AcceptedAnswerId = NULL WHERE Id = 14;
-UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 15 WHERE Id = 5;
-UPDATE Posts SET ParentId = 15, AcceptedAnswerId = NULL WHERE Id = 15;
 
+UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 11 WHERE Id = 1;  -- Question 1 has accepted answer 11
+UPDATE Posts SET ParentId = 1, AcceptedAnswerId = NULL WHERE Id = 11; -- Answer 11 has parent question 1
+UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 12 WHERE Id = 2;
+UPDATE Posts SET ParentId = 2, AcceptedAnswerId = NULL WHERE Id = 12;
+UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 13 WHERE Id = 3;
+UPDATE Posts SET ParentId = 3, AcceptedAnswerId = NULL WHERE Id = 13;
+UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 14 WHERE Id = 4;
+UPDATE Posts SET ParentId = 4, AcceptedAnswerId = NULL WHERE Id = 14;
+UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 15 WHERE Id = 5;
+UPDATE Posts SET ParentId = 5, AcceptedAnswerId = NULL WHERE Id = 15;
 -- Tags data
 INSERT INTO Tags (Id, TagName, Count) VALUES
 (1, 'sql', 500),
@@ -255,3 +254,14 @@ JOIN Posts p ON p.PostTypeId = pt.Id
 JOIN PostLinks pl ON p.Id = pl.PostId
 JOIN Posts r ON pl.RelatedPostId = r.Id
 JOIN PostTypes pt1 ON r.PostTypeId = pt1.Id;
+
+
+SELECT 
+    pt_left.type AS child_post_type,
+    child.id AS c_id,
+    parent.id AS p_id,
+    pt_right.type AS parent_post_type
+FROM posttypes pt_left
+LEFT JOIN posts child ON child.posttypeid = pt_left.id
+LEFT JOIN posts parent ON child.parentid = parent.id
+LEFT JOIN posttypes pt_right ON pt_right.id = parent.posttypeid;
