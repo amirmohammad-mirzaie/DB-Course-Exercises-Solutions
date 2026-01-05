@@ -131,6 +131,78 @@ UPDATE Posts SET ParentId = 4, AcceptedAnswerId = NULL WHERE Id = 14;
 UPDATE Posts SET ParentId = NULL, AcceptedAnswerId = 15 WHERE Id = 5;
 UPDATE Posts SET ParentId = 5, AcceptedAnswerId = NULL WHERE Id = 15;
 -- Tags data
+
+
+-- Add more answers to existing questions
+INSERT INTO Posts (Id, Body, Title, CreationDate, CommentCount, PostTypeId, OwnerUserId, DeletionDate, ParentId) VALUES
+-- Additional answers for Question 1 (SQL Query Optimization)
+(16, '<p>Another approach is to use materialized views for frequently accessed data.</p>', NULL, '2026-01-25 13:15:00', 1, 2, 3, NULL, 1),
+(17, '<p>Don''t forget to analyze your tables regularly to keep statistics updated.</p>', NULL, '2026-01-25 14:20:00', 0, 2, 4, NULL, 1),
+-- Additional answers for Question 2 (Database Indexing)
+(18, '<p>Composite indexes can be very effective when you frequently filter on multiple columns.</p>', NULL, '2026-01-24 16:45:00', 2, 2, 3, NULL, 2),
+(19, '<p>Consider partial indexes for frequently queried subsets of your data.</p>', NULL, '2026-01-24 17:30:00', 1, 2, 1, NULL, 2),
+-- Additional answers for Question 3 (Infinite Loop)
+(20, '<p>Use a watchdog timer pattern to automatically terminate long-running processes.</p>', NULL, '2026-01-23 11:45:00', 3, 2, 2, NULL, 3),
+-- Additional answers for Question 4 (NULL Values)
+(21, '<p>For calculations, consider using NULL-safe equals operator <=> in MySQL.</p>', NULL, '2026-01-22 18:15:00', 0, 2, 3, NULL, 4),
+-- New answers for Question 6 (JOIN Types)
+(22, '<p>CROSS JOIN creates a cartesian product while INNER JOIN filters based on a condition.</p>', NULL, '2026-01-20 14:30:00', 1, 2, 2, NULL, 6),
+(23, '<p>OUTER JOINs preserve rows that don''t match, filling NULLs for missing values.</p>', NULL, '2026-01-20 15:10:00', 2, 2, 1, NULL, 6),
+-- Additional answers for Question 7 (Recursive Queries)
+(24, '<p>WITH RECURSIVE syntax is very powerful for hierarchical data traversal in PostgreSQL.</p>', NULL, '2026-01-19 17:05:00', 1, 2, 1, NULL, 7),
+-- Additional answers for Question 9 (Loop Prevention)
+(25, '<p>Always validate your termination condition with edge cases to prevent infinite loops.</p>', NULL, '2026-01-17 11:20:00', 2, 2, 2, NULL, 9);
+
+-- Update ParentId relationships for existing answers (fix circular references)
+UPDATE Posts SET ParentId = 1 WHERE Id = 11; -- Answer 11 belongs to Question 1
+UPDATE Posts SET ParentId = 2 WHERE Id = 12; -- Answer 12 belongs to Question 2
+UPDATE Posts SET ParentId = 3 WHERE Id = 13; -- Answer 13 belongs to Question 3
+UPDATE Posts SET ParentId = 4 WHERE Id = 14; -- Answer 14 belongs to Question 4
+UPDATE Posts SET ParentId = 5 WHERE Id = 15; -- Answer 15 belongs to Question 5
+
+-- Update accepted answers for some questions
+UPDATE Posts SET AcceptedAnswerId = 16 WHERE Id = 1;  -- Change accepted answer for Question 1
+UPDATE Posts SET AcceptedAnswerId = 18 WHERE Id = 2;  -- Change accepted answer for Question 2
+UPDATE Posts SET AcceptedAnswerId = 20 WHERE Id = 3;  -- Change accepted answer for Question 3
+
+-- Add tags for the new answers (PostTags relationships)
+INSERT INTO PostTags (PostId, TagId) VALUES
+(16, 1), (16, 2), (16, 3), (16, 5),  -- sql, database, optimization, postgresql
+(17, 1), (17, 2), (17, 3),           -- sql, database, optimization
+(18, 1), (18, 2), (18, 4),           -- sql, database, indexing
+(19, 1), (19, 2), (19, 4), (19, 9),  -- sql, database, indexing, security
+(20, 6), (20, 7), (20, 8),           -- recursion, loops, bugs
+(21, 1), (21, 2),                    -- sql, database
+(22, 1), (22, 2), (22, 10),          -- sql, database, joins
+(23, 1), (23, 2), (23, 10),          -- sql, database, joins
+(24, 1), (24, 5), (24, 6),           -- sql, postgresql, recursion
+(25, 6), (25, 7);                    -- recursion, loops
+
+-- Add comments to the new answers
+INSERT INTO Comments (PostId, Score, Text, CreationDate, UserDisplayName, UserId, CalleeUserId) VALUES
+(16, 4, 'Materialized views are great for reporting dashboards!', '2026-01-25 13:30:00', 'LowRepUser', 3, 3),
+(17, 2, 'This saved me hours of query tuning', '2026-01-25 14:45:00', 'NewbieUser', 6, 4),
+(18, 7, 'I implemented this and saw a 3x performance improvement', '2026-01-24 17:00:00', 'HighRepExpert', 1, 3),
+(19, 5, 'Partial indexes are underutilized but so powerful', '2026-01-24 18:15:00', 'MediumRepDev', 2, 1),
+(20, 9, 'The watchdog pattern solved my infinite loop problem', '2026-01-23 12:20:00', 'HighRepExpert', 1, 2),
+(22, 8, 'This explanation cleared up my JOIN confusion', '2026-01-20 14:50:00', 'LowRepUser', 3, 2),
+(23, 6, 'Great point about OUTER JOINs preserving non-matching rows', '2026-01-20 15:45:00', 'MediumRepDev', 2, 1),
+(24, 11, 'This recursive query example helped me understand CTEs better', '2026-01-19 17:30:00', 'HighRepExpert', 1, 1),
+(25, 7, 'This is exactly what I needed to prevent my infinite loop bug', '2026-01-17 11:45:00', 'HighRepExpert', 1, 2);
+
+-- Update CommentCount for questions that got new comments on their answers
+UPDATE Posts SET CommentCount = CommentCount + 1 WHERE Id IN (1, 3, 4, 6, 7, 9);
+
+-- Create PostLinks to show relationships between related questions
+INSERT INTO PostLinks (CreationDate, PostId, RelatedPostId, LinkTypeId) VALUES
+('2026-01-25 13:45:00', 1, 7, 3),  -- Q1 related to Q7 (both about database optimization)
+('2026-01-24 18:00:00', 2, 4, 3),  -- Q2 related to Q4 (both about SQL handling)
+('2026-01-23 12:00:00', 3, 9, 3),  -- Q3 related to Q9 (both about loop prevention)
+('2026-01-22 19:00:00', 4, 6, 3),  -- Q4 related to Q6 (both about SQL syntax)
+('2026-01-19 17:45:00', 7, 1, 3);  -- Q7 related to Q1 (both about database optimization)
+
+
+
 INSERT INTO Tags (Id, TagName, Count) VALUES
 (1, 'sql', 500),
 (2, 'database', 350),
