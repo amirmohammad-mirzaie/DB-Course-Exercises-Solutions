@@ -315,37 +315,38 @@ LIMIT 1;
 
 
 -- the average of number of answers for a question
-SELECT 
-    pt.Type,
-    p.Id AS PostId,
-    pl.id AS PostLinkId,
-    r.Id AS RelatedPostId,
-    pt1.Type
-FROM PostTypes pt
-JOIN Posts p ON p.PostTypeId = pt.Id
-JOIN PostLinks pl ON p.Id = pl.PostId
-JOIN Posts r ON pl.RelatedPostId = r.Id
-JOIN PostTypes pt1 ON r.PostTypeId = pt1.Id;
-
 
 SELECT 
-    pt_left.type AS child_post_type,
-    child.id AS c_id,
-    parent.id AS p_id,
-    pt_right.type AS parent_post_type
-FROM posttypes pt_left
-LEFT JOIN posts child ON child.posttypeid = pt_left.id
-LEFT JOIN posts parent ON child.parentid = parent.id
-LEFT JOIN posttypes pt_right ON pt_right.id = parent.posttypeid
-ORDER BY p_id;
+    AVG(count)
+FROM
+    (
+        SELECT 
+            parent.id AS parent_id,
+            COUNT(child.id) AS count
+        FROM posts parent
+        LEFT JOIN posts child 
+            ON child.parentid = parent.id 
+            AND child.posttypeid = 2
+        WHERE parent.posttypeid = 1
+        GROUP BY parent.id
+        ORDER BY parent.id
+    );
 
-SELECT 
-    pt_right.type AS child_post_type,
-    child.id AS child_id,
-    pt_left.type AS parent_post_type,
-    parent.id AS parent_id
-FROM posttypes pt_left
-JOIN posts parent ON parent.posttypeid = pt_left.id
-JOIN posts child ON child.parentid = parent.id
-JOIN posttypes pt_right ON pt_right.id = child.posttypeid
-ORDER BY parent_id;
+
+
+SELECT AVG(count) FROM (
+    SELECT
+        parent.id AS parent_id,
+        COUNT(child.id) as count
+
+
+        FROM posts parent
+        LEFT JOIN posts child ON child.parentid = parent.id
+        WHERE parent.posttypeid = 1
+        GROUP BY parent.id
+        ORDER BY parent.id
+
+);
+
+
+
