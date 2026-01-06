@@ -31,10 +31,20 @@ ADD COLUMN ParentId INT REFERENCES Posts(Id);
 ALTER TABLE Posts
 ADD COLUMN AcceptedAnswerId INT REFERENCES Posts(Id);
 
+
+ALTER TABLE Posts
+ADD COLUMN Score INT;
+
+UPDATE Posts SET Score = floor(random() * 101);
+
+
+
 CREATE TABLE LinkType (
     Id SERIAL PRIMARY KEY,
     Type VARCHAR(64)
 );
+
+
 
 
 CREATE TABLE PostLinks (
@@ -368,3 +378,52 @@ FROM (
 )
 WHERE count > 2;
 
+-- Id of the questions with more than 1 answers plus the average of the scores of their answers
+
+SELECT
+    q.id as question_id,
+    a.id as answer_id
+FROM posts q
+LEFT JOIN posts a ON a.parentid = q.id;
+
+SELECT 
+    pt.type,
+    q.id AS question_id,
+    a.id AS answer_id
+FROM posttypes pt
+JOIN posts q ON q.posttypeid = pt.id AND pt.type = 'Question'
+LEFT JOIN posts a ON a.parentid = q.id
+ORDER BY q.id;
+
+
+SELECT 
+    question_id,
+    AVG(score) as avg_score
+
+FROM 
+(
+    SELECT 
+        pt.type,
+        q.id AS question_id,
+        a.id AS answer_id,
+        a.score AS score
+    FROM posttypes pt
+    JOIN posts q ON q.posttypeid = pt.id
+    LEFT JOIN posts a ON a.parentid = q.id
+
+    WHERE pt.type = 'Question'
+    ORDER BY q.id
+)
+GROUP BY question_id;
+
+
+-- list of users who has not asked any question but has at least 10 answers sorted by their reputation desc
+
+SELECT
+    u.id AS user_id,
+    p.id AS post_id,
+    pt.type AS post_type
+FROM users u
+LEFT JOIN posts p ON p.owneruserid = u.id
+JOIN posttypes pt ON pt.id = p.posttypeid
+ORDER BY u.id, pt.type;
