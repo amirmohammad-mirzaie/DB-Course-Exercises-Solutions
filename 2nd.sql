@@ -336,4 +336,16 @@ SELECT
 FROM posttypes pt_left
 LEFT JOIN posts child ON child.posttypeid = pt_left.id
 LEFT JOIN posts parent ON child.parentid = parent.id
-LEFT JOIN posttypes pt_right ON pt_right.id = parent.posttypeid;
+LEFT JOIN posttypes pt_right ON pt_right.id = parent.posttypeid
+ORDER BY p_id;
+
+SELECT 
+    pt_right.type AS child_post_type,
+    child.id AS child_id,
+    pt_left.type AS parent_post_type,
+    parent.id AS parent_id
+FROM posttypes pt_left
+JOIN posts parent ON parent.posttypeid = pt_left.id
+JOIN posts child ON child.parentid = parent.id
+JOIN posttypes pt_right ON pt_right.id = child.posttypeid
+ORDER BY parent_id;
