@@ -350,3 +350,21 @@ SELECT AVG(count) FROM (
 
 
 
+-- the number of users who has created more than 100 answers 
+
+SELECT 
+    u_id,
+    count
+    
+FROM (
+    SELECT
+        u.id AS u_id,
+        -- p.id AS p_id,
+        COUNT(p.id) AS count
+    FROM users u
+    LEFT JOIN posts p ON u.id = p.owneruserid
+    GROUP BY u.id
+    ORDER BY u.id
+)
+WHERE count > 2;
+
