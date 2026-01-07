@@ -13,6 +13,11 @@ CREATE TABLE Users (
 );
 
 
+
+
+
+
+
 CREATE TABLE Posts (
     Id SERIAL PRIMARY KEY,
     Body TEXT NOT NULL,
@@ -532,3 +537,63 @@ GROUP BY u.id
 ORDER BY post_score_avg DESC;
 
 
+-- Id UserId Name Date Class TagBased
+
+-- CreationDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+CREATE TABLE Badges (
+    Id SERIAL PRIMARY KEY,
+    UserId INT REFERENCES Users(Id),
+    Name VARCHAR(64),
+    Date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Class INT,
+    TagBased BOOLEAN
+);
+
+INSERT INTO Badges (UserId, Name, Date, Class, TagBased) VALUES
+(7, 'First Post', '2026-01-06 09:15:00', 3, false),
+(7, 'Informed', '2026-01-06 14:30:00', 3, false),
+(7, 'First Post', '2026-01-06 09:15:00', 2, false),
+(7, 'sql', '2026-01-06 16:45:00', 3, true),  -- Tag-based badge for SQL contributions
+-- User 8 badges
+(8, 'First Comment', '2026-01-06 10:20:00', 3, false),
+(8, 'Scholar', '2026-01-06 11:40:00', 3, false),
+(8, 'database', '2026-01-06 17:10:00', 3, true); -- Tag-based badge for database contributions
+
+-- -- a list of user ids, the number of gold badges, and the count on posts
+
+
+
+SELECT
+    u.id AS user_id,
+    b.id AS badge_id,
+    (CASE 
+    WHEN b.class = 1 THEN 'Gold' 
+    WHEN b.class = 2 THEN 'Silver' 
+    WHEN b.class = 3 THEN 'Bronze' END) AS class_name,
+    p.id AS post_id
+FROM users u
+LEFT JOIN badges b 
+    ON b.userid = u.id
+LEFT JOIN posts p 
+    ON p.owneruserid = u.id
+ORDER BY user_id, post_id, badge_id;
+
+
+
+
+SELECT
+    u.id AS user_id,
+    COUNT(p.id) AS post_count
+FROM users u
+LEFT JOIN badges b 
+    ON b.userid = u.id AND b.class = 3
+LEFT JOIN posts p 
+    ON p.owneruserid = u.id
+WHERE (CASE 
+    WHEN b.class = 1 THEN 'Gold' 
+    WHEN b.class = 2 THEN 'Silver' 
+    WHEN b.class = 3 THEN 'Bronze' END) = 'Bronze'
+GROUP BY user_id
+HAVING COUNT(p.id) > 0
+ORDER BY user_id;
