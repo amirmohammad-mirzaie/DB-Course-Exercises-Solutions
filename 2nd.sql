@@ -466,7 +466,7 @@ FROM
             user_id,
             MAX(reputation) AS reputation,
             post_type,
-            count(post_id) AS count
+            COUNT(post_id) AS count
         FROM (
             SELECT
                 u.id AS user_id,
@@ -480,7 +480,6 @@ FROM
             ) ON p.owneruserid = u.id
         )
         GROUP BY user_id, post_type
-        ORDER BY user_id
     )
     GROUP BY user_id
 
