@@ -485,3 +485,35 @@ FROM
 
 )
 ORDER BY reputation DESC;
+
+SELECT 
+    user_id,
+    TRUE AS condition_met,
+    reputation
+FROM
+    (
+    
+    SELECT 
+        user_id,
+        MAX(reputation) AS reputation
+        
+    FROM (
+        SELECT
+            u.id AS user_id,
+            MAX(u.reputation) AS reputation,
+            COUNT(p.id) AS count,
+            pt.type AS post_type
+        FROM users u
+        LEFT JOIN (
+            posts p
+            JOIN posttypes pt ON pt.id = p.posttypeid
+        ) ON p.owneruserid = u.id
+        GROUP BY user_id, post_type
+    )
+
+    GROUP BY user_id
+    HAVING 
+        (MAX(CASE WHEN post_type = 'Question' THEN count ELSE 0 END) >= 0) 
+        AND (MAX(CASE WHEN post_type = 'Answer' THEN count ELSE 0 END) >= 0)
+)
+ORDER BY reputation DESC;
