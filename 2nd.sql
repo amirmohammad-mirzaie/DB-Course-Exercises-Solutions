@@ -427,3 +427,58 @@ FROM users u
 LEFT JOIN posts p ON p.owneruserid = u.id
 JOIN posttypes pt ON pt.id = p.posttypeid
 ORDER BY u.id, pt.type;
+
+
+ 
+SELECT 
+    user_id,
+    post_type,
+    count(post_id) AS count
+ FROM (
+    SELECT
+        u.id AS user_id,
+        p.id AS post_id,
+        pt.type AS post_type
+    FROM users u
+    LEFT JOIN posts p ON p.owneruserid = u.id
+    JOIN posttypes pt ON pt.id = p.posttypeid
+    ORDER BY u.id, pt.type
+)
+GROUP BY user_id, post_type;
+
+
+SELECT 
+    user_id,
+    (CASE WHEN q_count=0 AND a_count > 10 THEN TRUE ELSE FALSE END) AS condition_met,
+    u.reputation
+
+FROM
+    (
+    SELECT 
+        user_id,
+        MAX(CASE WHEN post_type = 'Question' THEN count ELSE 0 END) AS q_count,
+        MAX(CASE WHEN post_type = 'Answer' THEN count ELSE 0 END) AS a_count
+        
+    FROM (
+        SELECT 
+            user_id,
+            post_type,
+            count(post_id) AS count
+        FROM (
+            SELECT
+                u.id AS user_id,
+                p.id AS post_id,
+                pt.type AS post_type
+            FROM users u
+            LEFT JOIN posts p ON p.owneruserid = u.id
+            JOIN posttypes pt ON pt.id = p.posttypeid
+            ORDER BY u.id, pt.type
+        )
+        GROUP BY user_id, post_type
+    )
+    GROUP BY user_id
+
+)
+JOIN users u ON u.id=user_id
+ORDER BY u.reputation DESC;
+
