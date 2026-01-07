@@ -517,3 +517,18 @@ FROM
         AND (MAX(CASE WHEN post_type = 'Answer' THEN count ELSE 0 END) >= 0)
 )
 ORDER BY reputation DESC;
+
+-- list of users who are of highest quality- A high quality user is one that has at least one Answer and the average scores of his answers is high
+
+SELECT 
+    u.id AS user_id,
+    AVG(p.score) AS post_score_avg
+
+FROM users u
+JOIN (
+    posts p JOIN posttypes pt ON p.posttypeid = pt.id AND pt.type = 'Answer'
+) ON p.owneruserid = u.id
+GROUP BY u.id
+ORDER BY post_score_avg DESC;
+
+
