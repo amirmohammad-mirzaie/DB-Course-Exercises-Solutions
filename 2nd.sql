@@ -541,7 +541,7 @@ ORDER BY post_score_avg DESC;
 
 -- CreationDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-CREATE TABLE Badges (
+CREATE TABLE IF NOT EXISTS Badges (
     Id SERIAL PRIMARY KEY,
     UserId INT REFERENCES Users(Id),
     Name VARCHAR(64),
@@ -562,38 +562,20 @@ INSERT INTO Badges (UserId, Name, Date, Class, TagBased) VALUES
 
 -- -- a list of user ids, the number of gold badges, and the count on posts
 
-
-
-SELECT
-    u.id AS user_id,
-    b.id AS badge_id,
-    (CASE 
-    WHEN b.class = 1 THEN 'Gold' 
-    WHEN b.class = 2 THEN 'Silver' 
-    WHEN b.class = 3 THEN 'Bronze' END) AS class_name,
-    p.id AS post_id
-FROM users u
-LEFT JOIN badges b 
-    ON b.userid = u.id
-LEFT JOIN posts p 
-    ON p.owneruserid = u.id
-ORDER BY user_id, post_id, badge_id;
-
-
-
-
-SELECT
-    u.id AS user_id,
+SELECT 
+    user_id,
+    MAX(badge_count) AS badge_count,
     COUNT(p.id) AS post_count
-FROM users u
-LEFT JOIN badges b 
-    ON b.userid = u.id AND b.class = 3
-LEFT JOIN posts p 
-    ON p.owneruserid = u.id
-WHERE (CASE 
-    WHEN b.class = 1 THEN 'Gold' 
-    WHEN b.class = 2 THEN 'Silver' 
-    WHEN b.class = 3 THEN 'Bronze' END) = 'Bronze'
+FROM
+(
+    SELECT
+        u.id AS user_id,
+        COUNT(b.class) AS badge_count
+    FROM users u
+    LEFT JOIN badges b ON b.userid = u.id AND b.class = 1
+    GROUP BY user_id
+) AS UserBadges
+LEFT JOIN posts p ON p.owneruserid = user_id
 GROUP BY user_id
-HAVING COUNT(p.id) > 0
 ORDER BY user_id;
+
