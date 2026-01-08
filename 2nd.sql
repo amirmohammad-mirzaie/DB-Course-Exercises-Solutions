@@ -626,3 +626,30 @@ FROM users u
 LEFT JOIN badges b ON b.userid = u.id;
 
 
+
+-- users who do not have any badges
+-- solution 1
+SELECT
+    u.id AS user_id
+
+FROM users u
+LEFT JOIN badges b on b.userid = u.id
+GROUP BY u.id
+HAVING COUNT(b.id) = 0;
+
+-- solution 2
+SELECT
+    u.id AS user_id
+FROM users u
+
+EXCEPT
+
+(
+    SELECT
+        u.id AS user_id
+
+    FROM users u
+    LEFT JOIN badges b on b.userid = u.id
+    GROUP BY u.id
+    HAVING COUNT(b.id) > 0
+)
