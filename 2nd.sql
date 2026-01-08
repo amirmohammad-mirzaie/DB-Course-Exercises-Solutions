@@ -592,6 +592,8 @@ ORDER BY user_id;
 
 -- users who only ask questions without sending any answers
 
+
+-- solution 1
 SELECT
     u.id AS user_id,
     COUNT(p.id) AS post_count,
@@ -603,4 +605,24 @@ GROUP BY user_id
 HAVING SUM(CASE WHEN pt.type = 'Answer' THEN 1 ELSE 0 END) = 0
        AND SUM(CASE WHEN pt.type = 'Question' THEN 1 ELSE 0 END) >= 0
 ORDER BY user_id;
+
+
+-- solution 2
+SELECT 
+    DISTINCT p.owneruserid
+FROM posts p
+WHERE p.posttypeid = 1
+AND p.owneruserid IS NOT NULL
+
+EXCEPT
+    SELECT 
+        DISTINCT p.OwnerUserId
+    FROM Posts p
+    WHERE PostTypeId = 2;
+
+-- users who do not have any badges
+SELECT *
+FROM users u
+LEFT JOIN badges b ON b.userid = u.id;
+
 
