@@ -652,4 +652,44 @@ EXCEPT
     LEFT JOIN badges b on b.userid = u.id
     GROUP BY u.id
     HAVING COUNT(b.id) > 0
-)
+);
+
+
+-- use the 3 above criteria to delete the users who are not useful
+CREATE TEMP TABLE BadUsers AS
+    (
+        SELECT 
+            u.id AS user_id
+        FROM users u
+        LEFT JOIN (posts p JOIN posttypes pt ON p.posttypeid = pt.id AND pt.type = 'Answer') ON p.owneruserid = u.id
+        GROUP BY user_id
+        HAVING AVG(p.score) < 50
+        ORDER BY user_id
+    )
+    UNION
+    (
+        SELECT
+            u.id AS user_id
+        FROM users u
+        LEFT JOIN (posts p JOIN posttypes pt ON p.posttypeid = pt.id) ON p.owneruserid = u.id
+        GROUP BY user_id
+        HAVING SUM(CASE WHEN pt.type = 'Answer' THEN 1 ELSE 0 END) = 0 -- no answers
+            AND SUM(CASE WHEN pt.type = 'Question' THEN 1 ELSE 0 END) >= 0 -- 0 or more than 1 question
+        ORDER BY user_id
+
+    )
+    UNION 
+    (
+        SELECT
+            u.id AS user_id
+
+        FROM users u
+        LEFT JOIN badges b on b.userid = u.id
+        GROUP BY u.id
+        HAVING COUNT(b.id) = 0
+
+    );
+
+SELECT * FROM badusers;
+
+DROP TABLE BadUsers;
