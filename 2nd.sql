@@ -579,3 +579,28 @@ LEFT JOIN posts p ON p.owneruserid = user_id
 GROUP BY user_id
 ORDER BY user_id;
 
+-- users with average score of their posts < 50
+SELECT 
+    u.id AS user_id,
+    AVG(p.score) AS average_score
+FROM users u
+LEFT JOIN (posts p JOIN posttypes pt ON p.posttypeid = pt.id AND pt.type = 'Answer') ON p.owneruserid = u.id
+GROUP BY user_id
+HAVING AVG(p.score) < 50
+ORDER BY user_id;
+
+
+-- users who only ask questions without sending any answers
+
+SELECT
+    u.id AS user_id,
+    COUNT(p.id) AS post_count,
+    SUM(CASE WHEN pt.type = 'Answer' THEN 1 ELSE 0 END) AS answer_count,
+    SUM(CASE WHEN pt.type = 'Question' THEN 1 ELSE 0 END) AS question_count
+FROM users u
+LEFT JOIN (posts p JOIN posttypes pt ON p.posttypeid = pt.id) ON p.owneruserid = u.id
+GROUP BY user_id
+HAVING SUM(CASE WHEN pt.type = 'Answer' THEN 1 ELSE 0 END) = 0
+       AND SUM(CASE WHEN pt.type = 'Question' THEN 1 ELSE 0 END) >= 0
+ORDER BY user_id;
+
