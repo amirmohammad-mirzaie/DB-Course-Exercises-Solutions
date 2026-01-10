@@ -64,8 +64,7 @@ CREATE TABLE employees (
 -------------------------
 CREATE TABLE professor_levels (
     id SERIAL PRIMARY KEY,
-    level_name VARCHAR(64),
-    salary FLOAT,
+    level_name VARCHAR(64)
 );
 
 CREATE TABLE professors (
@@ -80,8 +79,7 @@ CREATE TABLE professors (
 -------------------------
 CREATE TABLE job_titles(
     id SERIAL PRIMARY KEY,
-    name VARCHAR(64),
-    salary FLOAT
+    job_name VARCHAR(64)
 );
 
 CREATE TABLE staff (
@@ -97,7 +95,6 @@ CREATE TABLE degrees (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128) UNIQUE,
     department_id INT REFERENCES departments(id),
-    graduation_date TIMESTAMP,
     UNIQUE (name, department_id)
     
 )
@@ -105,5 +102,7 @@ CREATE TABLE graduates (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES students(id),
     degree_id INT REFERENCES degrees(id),
-    UNIQUE (student_id, certificate_id)
+    UNIQUE (student_id, degree_id),
+    graduation_date TIMESTAMP
+
 )
