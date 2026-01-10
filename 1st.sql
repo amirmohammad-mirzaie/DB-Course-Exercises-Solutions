@@ -36,7 +36,7 @@ CREATE TABLE students (
 
 CREATE TABLE tas (
     id SERIAL PRIMARY KEY,
-    student_id INT REFERENCES students(user_id),
+    student_id INT REFERENCES students(id),
     ta_type VARCHAR(64) CHECK (ta_type IN ('Research Assistant', 'Teaching Assistant')),
     project_title VARCHAR(256),
     course_title VARCHAR(256),
@@ -96,13 +96,13 @@ CREATE TABLE staff (
 -------------------------
 CREATE TABLE degrees (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id),
     name VARCHAR(128) UNIQUE,
     department_id INT REFERENCES departments(id),
     UNIQUE (user_id, name, department_id)
     
 )
 CREATE TABLE graduates (
+    id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id),
     certificate_id INT REFERENCES degrees(id),
     UNIQUE (user_id, certificate_id)
