@@ -21,13 +21,19 @@ CREATE TABLE study_levels(
     id SERIAL PRIMARY KEY,
     level_name VARCHAR(64)
 );
+CREATE TABLE degrees (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128) UNIQUE,
+    department_id INT REFERENCES departments(id),
+    UNIQUE (name, department_id)
+    
+)
 
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id),
-    study_level_id INT REFERENCES study_levels(id),
-    department_id INT REFERENCES departments(id),
-    UNIQUE (user_id, study_level_id, department_id)
+    degree_id INT REFERENCES degrees(id),
+    UNIQUE (user_id, degree_id)
 )
 
 -------------------------
@@ -91,18 +97,8 @@ CREATE TABLE staff (
 -------------------------
 -- Graduated students related tables ----
 -------------------------
-CREATE TABLE degrees (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE,
-    department_id INT REFERENCES departments(id),
-    UNIQUE (name, department_id)
-    
-)
 CREATE TABLE graduates (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES students(id),
-    degree_id INT REFERENCES degrees(id),
-    UNIQUE (student_id, degree_id),
     graduation_date TIMESTAMP
-
 )
