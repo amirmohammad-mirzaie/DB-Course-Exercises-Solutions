@@ -4,7 +4,7 @@ CREATE TABLE departments(
     name VARCHAR(128),
 )
 
-CREATE TABLE people(
+CREATE TABLE users(
     id SERIAL PRIMARY KEY,
     name VARCHAR(64),
     id_card_number VARCHAR(64) UNIQUE,
@@ -23,7 +23,7 @@ CREATE TABLE study_levels(
 );
 
 CREATE TABLE students (
-    person_id INT REFERENCES people(id),
+    user_id INT REFERENCES users(id),
     study_level_id INT REFERENCES study_levels(id),
     department_id INT REFERENCES departments(id),
     UNIQUE (study_level_id, department_id)
@@ -43,7 +43,7 @@ CREATE TABLE assistant_jobs(
 
 CREATE TABLE assistants (
     id SERIAL PRIMARY KEY,
-    person_id INT REFERENCES people(id),
+    user_id INT REFERENCES users(id),
     job_id INT REFERENCES assistant_jobs(id)
 )
 
@@ -58,7 +58,7 @@ CREATE TABLE professor_levels (
 );
 
 CREATE TABLE professors (
-    person_id INT REFERENCES people(id),
+    user_id INT REFERENCES users(id),
     level_id INT REFERENCES professor_levels(id)
 )
 
@@ -68,16 +68,16 @@ CREATE TABLE professors (
 -------------------------
 CREATE TABLE certificates (
     id SERIAL PRIMARY KEY,
-    person_id INT REFERENCES people(id),
+    user_id INT REFERENCES users(id),
     name VARCHAR(128) UNIQUE,
     department_id INT REFERENCES departments(id),
-    UNIQUE (person_id, name, department_id)
+    UNIQUE (user_id, name, department_id)
     
 )
 CREATE TABLE graduates (
-    person_id INT REFERENCES people(id),
+    user_id INT REFERENCES users(id),
     certificate_id INT REFERENCES certificates(id),
-    UNIQUE (person_id, certificate_id)
+    UNIQUE (user_id, certificate_id)
 )
 
 -------------------------
@@ -90,7 +90,7 @@ CREATE TABLE job_titles(
 );
 
 CREATE TABLE employees (
-    person_id INT REFERENCES people(id),
+    user_id INT REFERENCES users(id),
     job_id INT REFERENCES job_titles(id),
-    UNIQUE (person_id, job_id)
+    UNIQUE (user_id, job_id)
 )
