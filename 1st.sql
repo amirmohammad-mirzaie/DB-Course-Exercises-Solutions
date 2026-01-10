@@ -17,15 +17,12 @@ CREATE TABLE users(
 -------------------------
 -- Students related tables ----
 -------------------------
-CREATE TABLE study_levels(
-    id SERIAL PRIMARY KEY,
-    level_name VARCHAR(64)
-);
+
 CREATE TABLE degrees (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE,
+    study_level VARCHAR(64),
     department_id INT REFERENCES departments(id),
-    UNIQUE (name, department_id)
+    UNIQUE (study_level, department_id)
     
 )
 
