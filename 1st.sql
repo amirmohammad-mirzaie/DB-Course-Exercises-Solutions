@@ -23,10 +23,11 @@ CREATE TABLE study_levels(
 );
 
 CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id),
     study_level_id INT REFERENCES study_levels(id),
     department_id INT REFERENCES departments(id),
-    UNIQUE (study_level_id, department_id)
+    UNIQUE (user_id, study_level_id, department_id)
 )
 
 -------------------------
