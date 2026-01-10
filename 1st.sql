@@ -30,7 +30,7 @@ CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id),
     degree_id INT REFERENCES degrees(id),
-    status VARCHAR(32) CHECK (status IN ('active', 'graduated', 'withdrawn', 'transferred'))
+    status VARCHAR(32) CHECK (status IN ('active', 'graduated', 'withdrawn', 'transferred')) DEFAULT 'active',
     UNIQUE (user_id, degree_id)
 )
 
