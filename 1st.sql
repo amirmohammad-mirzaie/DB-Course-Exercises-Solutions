@@ -15,6 +15,21 @@ CREATE TABLE people(
 )
 
 -------------------------
+-- Students related tables ----
+-------------------------
+CREATE TABLE study_levels(
+    id SERIAL PRIMARY KEY,
+    level_name VARCHAR(64)
+);
+
+CREATE TABLE students (
+    person_id INT REFERENCES people(id),
+    study_level_id INT REFERENCES study_levels(id),
+    department_id INT REFERENCES departments(id),
+    UNIQUE (study_level_id, department_id)
+)
+
+-------------------------
 -- TA related tables ----
 -------------------------
 
@@ -47,21 +62,6 @@ CREATE TABLE professors (
     level_id INT REFERENCES professor_levels(id)
 )
 
-
--------------------------
--- Students related tables ----
--------------------------
-CREATE TABLE study_levels(
-    id SERIAL PRIMARY KEY,
-    level_name VARCHAR(64)
-);
-
-CREATE TABLE students (
-    person_id INT REFERENCES people(id),
-    study_level_id INT REFERENCES study_levels(id),
-    department_id INT REFERENCES departments(id),
-    UNIQUE (study_level_id, department_id)
-)
 
 -------------------------
 -- Graduated students related tables ----
