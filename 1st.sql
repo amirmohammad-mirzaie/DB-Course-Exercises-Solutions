@@ -33,6 +33,20 @@ CREATE TABLE students (
 -- TA related tables ----
 -------------------------
 
+CREATE TABLE tas (
+    id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES students(user_id),
+    ta_type VARCHAR(64) CHECK (ta_type IN ('Research Assistant', 'Teaching Assistant')),
+    project_title VARCHAR(256),
+    course_title VARCHAR(256),
+
+    CHECK(
+        (ta_type = 'Research Assistant' AND project_title IS NOT NULL) OR
+        (ta_type = 'Teaching Assistant' AND course_title IS NOT NULL)
+    )
+)
+
+
 CREATE TABLE assistant_jobs(
     id SERIAL PRIMARY KEY,
     is_ta BOOLEAN,
