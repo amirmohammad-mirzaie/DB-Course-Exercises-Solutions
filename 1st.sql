@@ -80,7 +80,7 @@ CREATE TABLE professors (
 -------------------------
 -- Graduated students related tables ----
 -------------------------
-CREATE TABLE certificates (
+CREATE TABLE degrees (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id),
     name VARCHAR(128) UNIQUE,
@@ -90,7 +90,7 @@ CREATE TABLE certificates (
 )
 CREATE TABLE graduates (
     user_id INT REFERENCES users(id),
-    certificate_id INT REFERENCES certificates(id),
+    certificate_id INT REFERENCES degrees(id),
     UNIQUE (user_id, certificate_id)
 )
 
