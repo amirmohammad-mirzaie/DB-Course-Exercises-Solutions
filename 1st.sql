@@ -48,18 +48,14 @@ CREATE TABLE tas (
 )
 
 
-CREATE TABLE assistant_jobs(
-    id SERIAL PRIMARY KEY,
-    is_ta BOOLEAN,
-    name VARCHAR(128),
-    salary FLOAT,
-)
 
-
-CREATE TABLE assistants (
+-------------------------
+-- Employees related tables ----
+-------------------------
+CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id),
-    job_id INT REFERENCES assistant_jobs(id)
+    salary FLOAT
 )
 
 
@@ -73,10 +69,27 @@ CREATE TABLE professor_levels (
 );
 
 CREATE TABLE professors (
-    user_id INT REFERENCES users(id),
+    id INT SERIAL PRIMARY KEY,
+    employee_id INT REFERENCES employees(id),
     level_id INT REFERENCES professor_levels(id)
 )
 
+
+-------------------------
+-- staff related tables ----
+-------------------------
+CREATE TABLE job_titles(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(64),
+    salary FLOAT,
+);
+
+CREATE TABLE staff (
+    id SERIAL PRIMARY KEY,
+    employee_id INT REFERENCES employees(id),
+    job_id INT REFERENCES job_titles(id),
+    UNIQUE (employee_id, job_id)
+)
 
 -------------------------
 -- Graduated students related tables ----
@@ -93,19 +106,4 @@ CREATE TABLE graduates (
     user_id INT REFERENCES users(id),
     certificate_id INT REFERENCES degrees(id),
     UNIQUE (user_id, certificate_id)
-)
-
--------------------------
--- employee related tables ----
--------------------------
-CREATE TABLE job_titles(
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(64),
-    salary FLOAT,
-);
-
-CREATE TABLE employees (
-    user_id INT REFERENCES users(id),
-    job_id INT REFERENCES job_titles(id),
-    UNIQUE (user_id, job_id)
 )
