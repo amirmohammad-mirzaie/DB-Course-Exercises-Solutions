@@ -49,17 +49,17 @@ CREATE TABLE graduates (
 -- TA related tables ----
 -------------------------
 
-CREATE TABLE tas (
+CREATE TABLE teaching_assistants (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES students(id),
-    ta_type VARCHAR(64) CHECK (ta_type IN ('Research Assistant', 'Teaching Assistant')),
-    project_title VARCHAR(256),
-    course_title VARCHAR(256),
+    course_title VARCHAR(256) NOT NULL
+)
 
-    CHECK(
-        (ta_type = 'Research Assistant' AND project_title IS NOT NULL) OR
-        (ta_type = 'Teaching Assistant' AND course_title IS NOT NULL)
-    )
+
+CREATE TABLE research_assistants (
+    id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES students(id),
+    project_title VARCHAR(256) NOT NULL
 )
 
 
