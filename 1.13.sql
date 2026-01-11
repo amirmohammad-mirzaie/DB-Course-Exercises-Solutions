@@ -1,10 +1,16 @@
+-- doctors related tables
+CREATE TABLE specialties (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128) UNIQUE,
+
+)
 
 CREATE TABLE doctors (
     id SERIAL PRIMARY KEY,
     doctor_number VARCHAR(128),
     name VARCHAR(128),
-    profession_name VARCHAR(128), -- this can be in a separate table
-    working_years INT -- this can be in a separate table
+    specialty_id INT REFERENCES specialties(id),
+    working_years INT
 )
 
 CREATE TABLE departments (
@@ -47,14 +53,15 @@ CREATE TABLE beds (
 )
 
 
-CREATE TABLE junction_surgeries_infos (
+CREATE TABLE surgeries (
     id SERIAL PRIMARY KEY,
-    date TIMESTAMP,
+    date TIMESTAMP
 )
 
-CREATE TABLE surgeries (
-    surgery_info_id INT REFERENCES junction_surgeries_infos(id),
+CREATE TABLE junction_surgeries (
+    id SERIAL PRIMARY KEY,
+    surgery_id INT REFERENCES surgeries(id),
     patient_id INT REFERENCES patients(id),
     doctor_id INT REFERENCES doctors(id),
-    PRIMARY KEY (surgery_info_id, patient_id, doctor_id)
+    UNIQUE (surgery_id, patient_id, doctor_id)
 )
