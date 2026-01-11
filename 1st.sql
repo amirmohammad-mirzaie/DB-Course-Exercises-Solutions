@@ -21,8 +21,10 @@ CREATE TABLE users(
 CREATE TABLE degrees (
     id SERIAL PRIMARY KEY,
     study_level VARCHAR(64),
+    degree_name VARCHAR(128),
     department_id INT REFERENCES departments(id),
-    UNIQUE (study_level, department_id)
+    UNIQUE (study_level, department_id),
+    UNIQUE (degree_name, department_id)
     
 )
 
