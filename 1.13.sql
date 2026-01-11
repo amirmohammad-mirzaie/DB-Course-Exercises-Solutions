@@ -2,15 +2,16 @@
 CREATE TABLE specialties (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128) UNIQUE
-)
+);
 
 CREATE TABLE doctors (
     id SERIAL PRIMARY KEY,
     doctor_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
     name VARCHAR(128),
     specialty_id INT REFERENCES specialties(id),
+    CONSTRAINT fk_doctor_specialty FOREIGN KEY (specialty_id) REFERENCES specialties(id),
     working_years INT
-)
+);
 
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
