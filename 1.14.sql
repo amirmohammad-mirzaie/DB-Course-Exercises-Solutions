@@ -1,84 +1,81 @@
--- doctors related tables
-CREATE TABLE specialties (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE
+-- real state corporation design
+
+CREATE TABLE branches (
+    id SERIAL PRIMARY KEY
 )
 
-CREATE TABLE doctors (
+
+CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
-    doctor_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
     name VARCHAR(128),
-    specialty_id INT REFERENCES specialties(id),
-    working_years INT
+
+    branch_id INT REFERENCES branches(id),
+    CONSTRAINT fk_employee__branch FOREIGN KEY (branch_id) REFERENCES branches(id)
 )
 
-CREATE TABLE departments (
+CREATE TABLE flats (
     id SERIAL PRIMARY KEY,
-    department_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
-    name VARCHAR(128),
-    type VARCHAR(64) CHECK (type IN ('surgery', 'medical'))
-    
-)
+    flat_number VARCHAR(128) UNIQUE,
+    address VARCHAR(512),
+    rental_price FLOAT,
+    buy_price FLOAT,
+    status VARCHAR(64) CHECK (status IN ('rent', 'buy')),
 
--- admission to the hospital
-
-CREATE TABLE patients (
-    id SERIAL PRIMARY KEY,
-    patient_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
-    
-    doctor_id INT REFERENCES doctors(id),
-    CONSTRAINT fk_patient_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id),
-    
-    name VARCHAR(128),
-    sex_type VARCHAR(16) CHECK (sex_type IN ('male', 'female')),
-    date_of_birth TIMESTAMP,
-    address VARCHAR(256)
+    branch_id INT REFERENCES branches(id),
+    CONSTRAINT fk_flat__branch FOREIGN KEY (branch_id) REFERENCES branches(id)
 )
 
 
-CREATE TABLE admissions (
+
+CREATE TABLE contracts (
     id SERIAL PRIMARY KEY,
-    admission_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
-    admission_date TIMESTAMP,
-    discharge_date TIMESTAMP,
-    patient_id INT REFERENCES patients(id),
-    CONSTRAINT fk_admission_patient FOREIGN KEY (patient_id) REFERENCES patients(id),
-
-
-    department_id INT REFERENCES departments(id),
-    CONSTRAINT fk_admission_department FOREIGN KEY (department_id) REFERENCES departments(id),
-    
-    
-    bed_id INT REFERENCES beds(id),
-    CONSTRAINT fk_admission_bed FOREIGN KEY (bed_id) REFERENCES beds(id)
-    
-)
-
-
-CREATE TABLE beds (
-    id SERIAL PRIMARY KEY,
-    type VARCHAR(64) CHECK (type IN ('electrical', 'simple')),
-    department_id INT REFERENCES departments(id),
-    CONSTRAINT fk_bed_department FOREIGN KEY (department_id) REFERENCES departments(id)
-)
-
-
-CREATE TABLE surgeries (
-    id SERIAL PRIMARY KEY,
+    contract_number VARCHAR(128) UNIQUE,
     date TIMESTAMP,
-    patient_id INT REFERENCES patients(id),
-    CONSTRAINT fk_surgery_patient FOREIGN KEY (patient_id) REFERENCES patients(id)
+    branch_id INT REFERENCES branches(id),
+    CONSTRAINT fk_contract__branch FOREIGN KEY (branch_id) REFERENCES branches(id)
+)
+CREATE TABLE rental_contracts (
+    id SERIAL PRIMARY KEY,
+    base_payment BIGINT,
+    monthly_payment BIGINT,
+    contract_id INT REFERENCES contracts(id) UNIQUE,
+    CONSTRAINT fk_rental_contract__contract FOREIGN KEY (contract_id) REFERENCES contracts(id)
     
+);
+
+CREATE TABLE purchase_contracts (
+    id SERIAL PRIMARY KEY,
+    purchase_payment BIGINT,
+    contract_id INT REFERENCES contracts(id) UNIQUE,
+    CONSTRAINT fk_purchase_contract__contract FOREIGN KEY (contract_id) REFERENCES contracts(id),
+);
+
+
+
+CREATE TABLE customers (
+    id SERIAL PRIMARY KEY,
+    national_id VARCHAR(128),
+    name VARCHAR(128),
 )
 
-CREATE TABLE junction_surgeries (
 
-    surgery_id INT REFERENCES surgeries(id),
-    CONSTRAINT fk_junction_surgery FOREIGN KEY (surgery_id) REFERENCES surgeries(id),
-    
+CREATE TABLE junction_customer_rental_contracts (
+    customer_id INT REFERENCES customers(id),
+    CONSTRAINT fk_junction_customer_rental_contract__customer FOREIGN KEY (customer_id) REFERENCES customers(id),
 
-    doctor_id INT REFERENCES doctors(id),
-    CONSTRAINT fk_junction_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id),
-    
-    PRIMARY KEY (surgery_id, doctor_id)
+    contract_id INT REFERENCES rental_contracts(id),
+    CONSTRAINT fk_junction_customer_contract__rental_contract FOREIGN KEY (contract_id) REFERENCES rental_contracts(id),
+
+    PRIMARY KEY (customer_id, contract_id)
+)
+
+
+CREATE TABLE junction_customer_purchase_contracts (
+    customer_id INT REFERENCES customers(id),
+    CONSTRAINT fk_junction_customer_purchase_contract__customer FOREIGN KEY (customer_id) REFERENCES customers(id),
+
+    contract_id INT REFERENCES purchase_contracts(id),
+    CONSTRAINT fk_junction_customer_contract__purchase_contract FOREIGN KEY (contract_id) REFERENCES purchase_contracts(id),
+
+    PRIMARY KEY (customer_id, contract_id)
 )
