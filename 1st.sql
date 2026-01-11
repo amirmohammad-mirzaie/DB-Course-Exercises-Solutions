@@ -37,6 +37,15 @@ CREATE TABLE students (
 )
 
 -------------------------
+-- Graduated students related tables ----
+-------------------------
+CREATE TABLE graduates (
+    id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES students(id),
+    graduation_date TIMESTAMP
+)
+
+-------------------------
 -- TA related tables ----
 -------------------------
 
@@ -92,13 +101,4 @@ CREATE TABLE staff (
     id SERIAL PRIMARY KEY,
     employee_id INT REFERENCES employees(id),
     job_id INT REFERENCES job_titles(id)
-)
-
--------------------------
--- Graduated students related tables ----
--------------------------
-CREATE TABLE graduates (
-    id SERIAL PRIMARY KEY,
-    student_id INT REFERENCES students(id),
-    graduation_date TIMESTAMP
 )
