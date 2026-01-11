@@ -70,7 +70,8 @@ CREATE TABLE tas (
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id),
-    salary FLOAT
+    salary FLOAT,
+    employee_type VARCHAR(64) CHECK (employee_type IN ('professor', 'staff'))
 )
 
 
