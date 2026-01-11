@@ -6,7 +6,7 @@ CREATE TABLE specialties (
 
 CREATE TABLE doctors (
     id SERIAL PRIMARY KEY,
-    doctor_number VARCHAR(128) UNIQUE,
+    doctor_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
     name VARCHAR(128),
     specialty_id INT REFERENCES specialties(id),
     working_years INT
@@ -14,7 +14,7 @@ CREATE TABLE doctors (
 
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
-    department_number VARCHAR(128) UNIQUE,
+    department_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
     name VARCHAR(128),
     type VARCHAR(64) CHECK (type IN ('surgery', 'medical'))
     
@@ -24,7 +24,7 @@ CREATE TABLE departments (
 
 CREATE TABLE patients (
     id SERIAL PRIMARY KEY,
-    patient_number VARCHAR(128) UNIQUE,
+    patient_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
     
     doctor_id INT REFERENCES doctors(id),
     CONSTRAINT fk_patient_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id),
@@ -43,7 +43,7 @@ CREATE TABLE patients (
 
 CREATE TABLE admissions (
     id SERIAL PRIMARY KEY,
-    admission_number VARCHAR(128) UNIQUE,
+    admission_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
     admission_date TIMESTAMP,
     discharge_date TIMESTAMP,
     patient_id INT REFERENCES patients(id)
