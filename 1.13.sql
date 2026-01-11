@@ -10,6 +10,7 @@ CREATE TABLE doctors (
     name VARCHAR(128),
     specialty_id INT REFERENCES specialties(id),
     CONSTRAINT fk_doctor_specialty FOREIGN KEY (specialty_id) REFERENCES specialties(id),
+    -- TODO: to add indexing for the foreign keys
     working_years INT
 );
 
