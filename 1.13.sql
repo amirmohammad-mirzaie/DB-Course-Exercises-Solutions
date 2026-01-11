@@ -30,7 +30,7 @@ CREATE TABLE patients (
     name VARCHAR(128),
     age INT,
     sex_type VARCHAR(16) CHECK (sex_type IN ('male', 'female'))
-    date_born TIMESTAMP,
+    date_of_birth TIMESTAMP,
     department_id INT REFERENCES departments(id)
     address VARCHAR(256)
 )
@@ -55,13 +55,13 @@ CREATE TABLE beds (
 
 CREATE TABLE surgeries (
     id SERIAL PRIMARY KEY,
-    date TIMESTAMP
+    date TIMESTAMP,
+    patient_id INT REFERENCES patients(id)
 )
 
 CREATE TABLE junction_surgeries (
     id SERIAL PRIMARY KEY,
     surgery_id INT REFERENCES surgeries(id),
-    patient_id INT REFERENCES patients(id),
     doctor_id INT REFERENCES doctors(id),
-    UNIQUE (surgery_id, patient_id, doctor_id)
+    UNIQUE (surgery_id, doctor_id)
 )
