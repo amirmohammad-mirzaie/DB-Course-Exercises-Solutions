@@ -43,7 +43,14 @@ CREATE TABLE graduates (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES students(id),
     degree_id INT REFERENCES degrees(id),
-    graduation_date TIMESTAMP
+)
+
+
+CREATE TABLE graduates_degrees (
+    graduate_id INT REFERENCES graduates(id),
+    degree_id INT REFERENCES degrees(id),
+    graduation_date TIMESTAMP,
+    PRIMARY KEY (graduate_id, degree_id)
 )
 
 -------------------------
