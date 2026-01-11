@@ -42,6 +42,7 @@ CREATE TABLE students (
 CREATE TABLE graduates (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES students(id),
+    degree_id INT REFERENCES degrees(id),
     graduation_date TIMESTAMP
 )
 
