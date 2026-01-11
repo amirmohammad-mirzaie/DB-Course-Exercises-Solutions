@@ -69,7 +69,7 @@ CREATE TABLE research_assistants (
 -------------------------
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id),
+    user_id INT REFERENCES users(id) UNIQUE,
     salary FLOAT,
     employee_type VARCHAR(64) CHECK (employee_type IN ('professor', 'staff'))
 )
