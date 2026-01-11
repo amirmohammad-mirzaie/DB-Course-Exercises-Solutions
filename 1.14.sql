@@ -39,7 +39,10 @@ CREATE TABLE rental_contracts (
     base_payment BIGINT,
     monthly_payment BIGINT,
     contract_id INT REFERENCES contracts(id) UNIQUE,
-    CONSTRAINT fk_rental_contract__contract FOREIGN KEY (contract_id) REFERENCES contracts(id)
+    CONSTRAINT fk_rental_contract__contract FOREIGN KEY (contract_id) REFERENCES contracts(id),
+    duration INT CHECK (duration IN (6, 12, 24)),
+    start_date TIMESTAMP,
+    end_date TIMESTAMP
     
 );
 
