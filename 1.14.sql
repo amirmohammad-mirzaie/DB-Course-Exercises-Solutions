@@ -84,9 +84,41 @@ CREATE TABLE revocations (
 );
 
 
+-- create a trigger to check no two rental contracts overlap with each other
+
 
 CREATE INDEX idx_contracts_contract_number ON contracts(contract_number);
 CREATE INDEX idx_customers_national_id ON customers(national_id);
 CREATE INDEX idx_flats_flat_number ON flats(flat_number);
 CREATE INDEX idx_contracts_flat_id ON contracts(flat_id);
 CREATE INDEX idx_contracts_customer_id ON contracts(customer_id);
+
+
+
+
+CREATE OR REPLACE FUNCTION check_rental_contract_overlap()
+RETURNS TRIGGER AS $$
+DECLARE
+    overlap_count INT;
+BEGIN
+    -- Count existing rental contracts for the same flat that overlap with the new contract
+    SELECT COUNT(*) INTO overlap_count
+    FROM rental_contracts rc
+    JOIN contracts c ON rc.contract_id = c.id
+    WHERE 
+        c.flat_id = NEW.flat_id AND
+        (
+            NEW.start_date < rc.end_date
+            AND NEW.end_date > rc.start_date
+        ) AND 
+        rc.contract_id != NEW.contract_id;
+    
+    -- If any overlap found, raise error
+    IF overlap_count > 0 THEN
+        RAISE EXCEPTION 'Cannot create or update rental contract: overlap with existing contract for this flat.';
+    END IF;
+
+    RETURN NEW
+END;
+$$ LANGUAGE plpgsql;
+
