@@ -13,6 +13,15 @@ CREATE TABLE employees (
     CONSTRAINT fk_employee__branch FOREIGN KEY (branch_id) REFERENCES branches(id)
 )
 
+
+CREATE TABLE customers (
+    id SERIAL PRIMARY KEY,
+    national_id VARCHAR(128) UNIQUE NOT NULL,
+    name VARCHAR(128) NOT NULL,
+    phone VARCHAR(20),
+    email VARCHAR(20)
+)
+
 CREATE TABLE flats (
     id SERIAL PRIMARY KEY,
     flat_number VARCHAR(128) UNIQUE,
@@ -86,15 +95,6 @@ CREATE TABLE revocations (
     revocation_date TIMESTAMP NOT NULL DEFAULT NOW()
 )
 
-
-
-CREATE TABLE customers (
-    id SERIAL PRIMARY KEY,
-    national_id VARCHAR(128) UNIQUE NOT NULL,
-    name VARCHAR(128) NOT NULL,
-    phone VARCHAR(20),
-    email VARCHAR(20)
-)
 
 
 CREATE TABLE junction_customer_rental_contracts (
