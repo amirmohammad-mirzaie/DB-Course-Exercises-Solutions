@@ -42,6 +42,13 @@ CREATE TABLE contracts (
     flat_id INT REFERENCES flats(id),
     CONSTRAINT fk_contract__flat FOREIGN KEY (flat_id) REFERENCES flats(id),
 );
+
+
+CREATE TABLE purchase_contracts (
+    contract_id INT PRIMARY KEY REFERENCES contracts(id) ON DELETE CASCADE,
+    purchase_payment NUMERIC(15,2) NOT NULL
+);
+
 CREATE TABLE rental_contracts (
     contract_id INT PRIMARY KEY REFERENCES contracts(id) ON DELETE CASCADE,
     base_payment NUMERIC(15,2) NOT NULL,
@@ -78,11 +85,6 @@ CREATE TABLE revocations (
     revocation_fee NUMERIC(15,2) NOT NULL,
     revocation_date TIMESTAMP NOT NULL DEFAULT NOW()
 )
-
-CREATE TABLE purchase_contracts (
-    contract_id INT PRIMARY KEY REFERENCES contracts(id) ON DELETE CASCADE,
-    purchase_payment NUMERIC(15,2) NOT NULL
-);
 
 
 
