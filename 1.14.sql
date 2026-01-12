@@ -10,7 +10,6 @@ CREATE TABLE branches (
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
-
     branch_id INT REFERENCES branches(id),
     CONSTRAINT fk_employee__branch FOREIGN KEY (branch_id) REFERENCES branches(id)
 );
@@ -21,17 +20,16 @@ CREATE TABLE customers (
     national_id CHAR(16) UNIQUE NOT NULL,
     name VARCHAR(128) NOT NULL,
     phone VARCHAR(20),
-    email VARCHAR(20)
+    email VARCHAR(128)
 );
 
 CREATE TABLE flats (
     id SERIAL PRIMARY KEY,
     flat_number VARCHAR(128) UNIQUE,
     address VARCHAR(512),
-    rental_price FLOAT,
-    buy_price FLOAT,
+    rental_price NUMERIC(15,2),
+    buy_price NUMERIC(15,2),
     status VARCHAR(64) CHECK (status IN ('rent', 'buy')),
-
     branch_id INT REFERENCES branches(id),
     CONSTRAINT fk_flat__branch FOREIGN KEY (branch_id) REFERENCES branches(id)
 );
@@ -42,14 +40,11 @@ CREATE TABLE contracts (
     id SERIAL PRIMARY KEY,
     contract_number VARCHAR(128) UNIQUE,
     contract_type VARCHAR(10) CHECK (contract_type IN ('rent', 'buy')) NOT NULL,
-    date TIMESTAMP NOT NULL DEFAULT NOW(),
-    
+    date TIMESTAMP NOT NULL DEFAULT NOW(),    
     customer_id INT REFERENCES customers(id) ON DELETE CASCADE,
-    CONSTRAINT fk_contract__customer FOREIGN KEY (customer_id) REFERENCES customers(id),
-
-
     flat_id INT REFERENCES flats(id) ON DELETE CASCADE,
-    CONSTRAINT fk_contract__flat FOREIGN KEY (flat_id) REFERENCES flats(id),
+    CONSTRAINT fk_contract__customer FOREIGN KEY (customer_id) REFERENCES customers(id),
+    CONSTRAINT fk_contract__flat FOREIGN KEY (flat_id) REFERENCES flats(id)
 );
 
 
@@ -64,37 +59,33 @@ CREATE TABLE rental_contracts (
     monthly_payment NUMERIC(15,2) NOT NULL,
     duration_months INT CHECK (duration_months IN (6, 12, 24)),
     start_date TIMESTAMP NOT NULL,
-    end_date TIMESTAMP NOT NULL
+    end_date TIMESTAMP NOT NULL,
+    CHECK (EXTRACT(MONTH FROM (end_date - start_date))) = duration_months
     
 );
 
 CREATE TABLE contract_renewals (
     id SERIAL PRIMARY KEY,
     renewal_number VARCHAR(64) UNIQUE NOT NULL,
-
     original_contract_id INT REFERENCES rental_contracts(contract_id) ON DELETE CASCADE,
-    CONSTRAINT fk_contract_renewal__rental_contract FOREIGN KEY (original_contract_id) REFERENCES rental_contracts(contract_id),
-
     renewal_percentage NUMERIC(5,2) NOT NULL,
     start_date TIMESTAMP NOT NULL,
-    end_date TIMESTAMP NOT NULL
-
+    end_date TIMESTAMP NOT NULL,
+    CONSTRAINT fk_contract_renewal__rental_contract FOREIGN KEY (original_contract_id) REFERENCES rental_contracts(contract_id)
 );
 
 CREATE TABLE revocations (
     id SERIAL PRIMARY KEY,
     revocation_number VARCHAR(64) UNIQUE,
-
     contract_id INT REFERENCES contracts(id) ON DELETE CASCADE,
-    CONSTRAINT fk_revocation__contract FOREIGN KEY (contract_id) REFERENCES contracts(id)
-
     revocation_fee NUMERIC(15,2) NOT NULL,
-    revocation_date TIMESTAMP NOT NULL DEFAULT NOW()
+    revocation_date TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_revocation__contract FOREIGN KEY (contract_id) REFERENCES contracts(id)
 );
 
 
 
-CRAEATE INDEX idx_contracts_contract_number ON contracts(contract_number);
+CREATE INDEX idx_contracts_contract_number ON contracts(contract_number);
 CREATE INDEX idx_customers_national_id ON customers(national_id);
 CREATE INDEX idx_flats_flat_number ON flats(flat_number);
 CREATE INDEX idx_contracts_flat_id ON contracts(flat_id);
