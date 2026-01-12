@@ -53,7 +53,7 @@ CREATE TABLE contract_renewals (
     original_contract_id INT REFERENCES rental_contracts(id),
     CONSTRAINT fk_contract_renewal__rental_contract FOREIGN KEY (original_contract_id) REFERENCES rental_contracts(id),
 
-    renewal_renewal_percentage FLOAT,
+    renewal_percentage FLOAT,
     start_date TIMESTAMP,
     end_date TIMESTAMP
 
