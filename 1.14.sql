@@ -68,10 +68,15 @@ CREATE TABLE contract_renewals (
     id SERIAL PRIMARY KEY,
     renewal_number VARCHAR(64) UNIQUE NOT NULL,
     original_contract_id INT REFERENCES rental_contracts(contract_id) ON DELETE CASCADE,
+    parent_renewal_id INT REFERENCES contract_renewals(id) DEFERRABLE INITIALLY DEFERRED,
     renewal_percentage NUMERIC(5,2) NOT NULL,
+    current_montly_payment NUMERIC(15,2) NOT NULL,  -- Automatically calculated with the trigger function
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,
-    CONSTRAINT fk_contract_renewal__rental_contract FOREIGN KEY (original_contract_id) REFERENCES rental_contracts(contract_id)
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled'))
+    CONSTRAINT fk_contract_renewal__rental_contract FOREIGN KEY (original_contract_id) REFERENCES rental_contracts(contract_id),
+    CONSTRAINT fk_contract_renewal__contract_renewal_parent FOREIGN KEY (parent_renewal_id) REFERENCES contract_renewals(id),
+    
 );
 
 CREATE TABLE revocations (
@@ -122,3 +127,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+
+-- to have a trigger for making sure the renting period does not overlap with the previous renewal contract or with the 
+-- original parent contract
