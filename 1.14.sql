@@ -16,7 +16,7 @@ CREATE TABLE employees (
 
 CREATE TABLE customers (
     id SERIAL PRIMARY KEY,
-    national_id VARCHAR(128) UNIQUE NOT NULL,
+    national_id CHAR(16) UNIQUE NOT NULL,
     name VARCHAR(128) NOT NULL,
     phone VARCHAR(20),
     email VARCHAR(20)
@@ -41,8 +41,6 @@ CREATE TABLE contracts (
     contract_number VARCHAR(128) UNIQUE,
     contract_type VARCHAR(10) CHECK (contract_type IN ('rent', 'buy')) NOT NULL,
     date TIMESTAMP NOT NULL DEFAULT NOW(),
-    branch_id INT REFERENCES branches(id),
-    CONSTRAINT fk_contract__branch FOREIGN KEY (branch_id) REFERENCES branches(id)
     
     customer_id INT REFERENCES customers(id) ON DELETE CASCADE,
     CONSTRAINT fk_contract__customer FOREIGN KEY (customer_id) REFERENCES customers(id),
