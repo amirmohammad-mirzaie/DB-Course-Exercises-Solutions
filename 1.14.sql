@@ -59,6 +59,15 @@ CREATE TABLE contract_renewals (
 
 )
 
+CREATE TABLE revocations (
+    id SERIAL PRIMARY KEY,
+    revocation_number VARCHAR(128) UNIQUE,
+    customer_id INT REFERENCES customers(id),
+    CONSTRAINT fk_revocation__customer FOREIGN KEY (customer_id) REFERENCES customers(id)
+
+
+)
+
 CREATE TABLE purchase_contracts (
     id SERIAL PRIMARY KEY,
     purchase_payment BIGINT,
