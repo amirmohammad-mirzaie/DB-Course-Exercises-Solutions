@@ -1,7 +1,9 @@
 -- real state corporation design
-
 CREATE TABLE branches (
-    id SERIAL PRIMARY KEY
+    id SERIAL PRIMARY KEY,
+    branch_number VARCHAR(64) UNIQUE NOT NULL,
+    name VARCHAR(128) NOT NULL,
+    address VARCHAR(512) NOT NULL
 );
 
 
