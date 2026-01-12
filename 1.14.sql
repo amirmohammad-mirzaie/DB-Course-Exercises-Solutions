@@ -94,26 +94,3 @@ CREATE TABLE revocations (
     revocation_fee NUMERIC(15,2) NOT NULL,
     revocation_date TIMESTAMP NOT NULL DEFAULT NOW()
 )
-
-
-
-CREATE TABLE junction_customer_rental_contracts (
-    customer_id INT REFERENCES customers(id),
-    CONSTRAINT fk_junction_customer_rental_contract__customer FOREIGN KEY (customer_id) REFERENCES customers(id),
-
-    contract_id INT REFERENCES rental_contracts(id),
-    CONSTRAINT fk_junction_customer_contract__rental_contract FOREIGN KEY (contract_id) REFERENCES rental_contracts(id),
-
-    PRIMARY KEY (customer_id, contract_id)
-)
-
-
-CREATE TABLE junction_customer_purchase_contracts (
-    customer_id INT REFERENCES customers(id),
-    CONSTRAINT fk_junction_customer_purchase_contract__customer FOREIGN KEY (customer_id) REFERENCES customers(id),
-
-    contract_id INT REFERENCES purchase_contracts(id),
-    CONSTRAINT fk_junction_customer_contract__purchase_contract FOREIGN KEY (contract_id) REFERENCES purchase_contracts(id),
-
-    PRIMARY KEY (customer_id, contract_id)
-)
