@@ -128,6 +128,46 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION calculate_renewal_price()
+RETURNS TRIGGER AS $$
+DECLARE
+    original_monthly_payment NUMERIC(15,2);
+BEGIN
+    -- If this is the first renewal (no parent), use original contract's monthly payment
+    IF NEW.parent_renewal_id IS NULL THEN
+        SELECT monthly_payment INTO original_monthly_payment
+        FROM rental_contracts
+        WHERE contract_id = NEW.original_contract_id;
 
--- to have a trigger for making sure the renting period does not overlap with the previous renewal contract or with the 
--- original parent contract
+        IF original_monthly_payment IS NULL THEN
+            RAISE EXCEPTION 'Original contract not found for renewal: %', NEW.contract_id;
+        END IF;
+
+        NEW.current_monthly_payment := original_monthly_payment * (1 + NEW.renewal_percentage / 100);
+    ELSE
+        -- Get the previous renewal's current monthly payment
+        SELECT current_monthly_payment INTO NEW.current_monthly_payment
+        FROM contract_renewals
+        WHERE id = NEW.parent_renewal_id;
+
+        IF NEW.current_monthly_payment IS NULL THEN
+            RAISE EXCEPTION 'Previous renewal not found for renewal ID: %', NEW.parent_renewal_id;
+        END IF;
+
+        -- Apply the renewal percentage
+        NEW.current_monthly_payment := NEW.current_monthly_payment * (1 + NEW.renewal_percentage / 100);
+    END IF;
+
+    RETURN NEW;
+END;
+$$LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_calculate_renewal_price
+BEFORE INSERT OR UPDATE ON contract_renewals
+FOR EACH ROW
+EXECUTE FUNCTION calculate_renewal_price();
+
+
+
+-- TODO: Implement triggers to ensure that a new renewal contract does not overlap with any existing renewal contracts
+-- (for the same flat or a different flat), nor with any active rental contracts in the rental_contracts table.
