@@ -43,8 +43,11 @@ CREATE TABLE contracts (
     date TIMESTAMP NOT NULL DEFAULT NOW(),    
     customer_id INT REFERENCES customers(id) ON DELETE CASCADE,
     flat_id INT REFERENCES flats(id) ON DELETE CASCADE,
+    branch_id INT REFERENCES branches(id) ON DELETE CASCADE, -- Add the branch to the contract so that we can directly find the branch related to a contract without the need to join with the flat table
+    
     CONSTRAINT fk_contract__customer FOREIGN KEY (customer_id) REFERENCES customers(id),
-    CONSTRAINT fk_contract__flat FOREIGN KEY (flat_id) REFERENCES flats(id)
+    CONSTRAINT fk_contract__flat FOREIGN KEY (flat_id) REFERENCES flats(id),
+    CONSTRAINT fk_contract__branch FOREIGN KEY (branch_id) REFERENCES branches(id)
 );
 
 
@@ -67,14 +70,14 @@ CREATE TABLE rental_contracts (
 CREATE TABLE contract_renewals (
     id SERIAL PRIMARY KEY,
     renewal_number VARCHAR(64) UNIQUE NOT NULL,
-    original_contract_id INT REFERENCES rental_contracts(contract_id) ON DELETE CASCADE,
+    original_contract_id INT REFERENCES contracts(id) ON DELETE CASCADE,
     parent_renewal_id INT REFERENCES contract_renewals(id) DEFERRABLE INITIALLY DEFERRED,
     renewal_percentage NUMERIC(5,2) NOT NULL,
     current_montly_payment NUMERIC(15,2) NOT NULL,  -- Automatically calculated with the trigger function
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,
-    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled'))
-    CONSTRAINT fk_contract_renewal__rental_contract FOREIGN KEY (original_contract_id) REFERENCES rental_contracts(contract_id),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled')),
+    CONSTRAINT fk_contract_renewal__contract FOREIGN KEY (original_contract_id) REFERENCES contracts(id),
     CONSTRAINT fk_contract_renewal__contract_renewal_parent FOREIGN KEY (parent_renewal_id) REFERENCES contract_renewals(id),
     
 );
@@ -171,3 +174,10 @@ EXECUTE FUNCTION calculate_renewal_price();
 
 -- TODO: Implement triggers to ensure that a new renewal contract does not overlap with any existing renewal contracts
 -- (for the same flat or a different flat), nor with any active rental contracts in the rental_contracts table.
+
+-- TODO: To add a trigger that checks if a contract type is aligned with the corresponding flat
+
+-- TODO: To use a view or computed column instead of the trigger for calculating the current_monthly_payment for the 
+-- renewal contracts
+
+-- TODO: Add a constraint to check if the flat_id for the renewal contracts refer to the same flat from the original contract
