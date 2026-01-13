@@ -1,0 +1,114 @@
+-- doctors related tables
+CREATE TABLE specialties (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128) UNIQUE
+);
+
+
+CREATE TABLE doctors (
+    id SERIAL PRIMARY KEY,
+    doctor_number CHAR(64) UNIQUE, -- assigned by the hospital itself
+    name VARCHAR(128),
+    specialty_id INT REFERENCES specialties(id),
+    CONSTRAINT fk_doctor_specialty FOREIGN KEY (specialty_id) REFERENCES specialties(id),
+);
+
+
+CREATE TABLE departments (
+    id SERIAL PRIMARY KEY,
+    department_number CHAR(64) UNIQUE, -- assigned by the hospital itself
+    name VARCHAR(128),
+    type VARCHAR(64) CHECK (type IN ('surgery', 'medical'))
+);
+
+CREATE TABLE subdepartments (
+    id SERIAL PRIMARY KEY,
+    department_id INT REFERENCES departments(id) ON DELETE CASCADE,
+    CONSTRAINT fk_sub_department_department FOREIGN KEY (department_id) REFERENCES departments(id)
+    -- TODO: To check whether we need to add the ON DELETE CASCADE to the constraint or not
+);
+
+
+CREATE TABLE beds (
+    id SERIAL PRIMARY KEY,
+    type VARCHAR(64) CHECK (type IN ('electrical', 'simple')),
+    sub_department_id INT REFERENCES subdepartments(id),
+    CONSTRAINT fk_bed_department FOREIGN KEY (sub_department_id) REFERENCES subdepartments(id)
+);
+
+-- each doctor can be in multiple sub departments and each subdepartment can have multiple doctors
+CREATE TABLE junction_doctor_subdepartments ( 
+    doctor_id INT REFERENCES doctors(id),
+    subdepartment_id INT REFERENCES subdepartments(id),
+    role VARCHAR(128),
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    PRIMARY KEY (doctor_id, subdepartment_id),
+    CHECK (start_date < end_date)
+
+);
+
+
+CREATE TABLE patients (
+    id SERIAL PRIMARY KEY,
+    patient_number CHAR(64) UNIQUE, -- assigned by the hospital itself
+    doctor_id INT REFERENCES doctors(id),
+    bed_id INT REFERENCES beds(id) NULLABLE UNIQUE,
+    name VARCHAR(128),
+    sex_type VARCHAR(16) CHECK (sex_type IN ('male', 'female')),
+    date_of_birth TIMESTAMP,
+    address VARCHAR(256),
+    CONSTRAINT fk_patient_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id),
+);
+
+CREATE TABLE illnesses (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128)
+);
+
+
+
+CREATE TABLE patient_diagnoses (
+    id SERIAL PRIMARY KEY,  
+    patient_id INT REFERENCES patients(id),
+    illness_id INT REFERENCES ilnesses(id),
+
+)
+
+CREATE TABLE medicines (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128),
+    summary TEXT
+)
+
+CREATE TABLE dosages (
+    id SERIAL PRIMARY KEY,
+    unit VARCHAR(128),
+)
+
+
+CREATE TABLE prescriptions (
+    id SERIAL PRIMARY KEY,
+    patient_id INT REFERENCES patients(id) NOT NULL,
+    medicine_id INT REFERENCES medicines(id) NOT NULL,
+    doctor_id INT REFERENCES doctors(id) NOT NULL,
+    reason VARCHAR(256),
+    dosage_unit VARCHAR(128), -- per day. For example "per_hour" means "amount" number per hour. Or "per_10_hour" means "amount" should be intaken in 10 hours
+    amount NUMERIC(5,2),
+    type VARCHAR(64) CHECK (type IN ('Intramuscular', 'oral'))
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    CHECK (start_date < end_date)
+)
+
+
+CREATE TABLE intakes (
+    id SERIAL PRIMARY KEY,
+    prescription_id INT REFERENCES prescriptions(id)
+)
+
+
+
+-- TODO: To set constraints for checking if the bed id is in the sub department id
+-- TODO: TO set constraints for checking the sub department is inside a department
+-- TODO: TO add indices for the primary keys and foreign keys
