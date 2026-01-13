@@ -81,11 +81,6 @@ CREATE TABLE medicines (
     summary TEXT
 )
 
-CREATE TABLE dosages (
-    id SERIAL PRIMARY KEY,
-    unit VARCHAR(128),
-)
-
 
 CREATE TABLE prescriptions (
     id SERIAL PRIMARY KEY,
@@ -93,9 +88,9 @@ CREATE TABLE prescriptions (
     medicine_id INT REFERENCES medicines(id) NOT NULL,
     doctor_id INT REFERENCES doctors(id) NOT NULL,
     reason VARCHAR(256),
-    dosage_unit VARCHAR(128), -- per day. For example "per_hour" means "amount" number per hour. Or "per_10_hour" means "amount" should be intaken in 10 hours
+    frequency_hour INT, -- 1, 2, ... 24,
     amount NUMERIC(5,2),
-    type VARCHAR(64) CHECK (type IN ('Intramuscular', 'oral'))
+    type VARCHAR(64) CHECK (type IN ('intramuscular', 'oral'))
     start_date TIMESTAMP,
     end_date TIMESTAMP,
     CHECK (start_date < end_date)
@@ -104,7 +99,11 @@ CREATE TABLE prescriptions (
 
 CREATE TABLE intakes (
     id SERIAL PRIMARY KEY,
-    prescription_id INT REFERENCES prescriptions(id)
+    prescription_id INT REFERENCES prescriptions(id),
+    administered_at TIMESTAMP,
+    administered_by INT REFERENCES doctors(id),
+    frequency_hour_given INT, -- 1, 2, ..., 24
+    amount_given NUMERIC(5,2),
 )
 
 
