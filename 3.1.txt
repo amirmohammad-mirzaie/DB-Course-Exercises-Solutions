@@ -32,7 +32,7 @@ CREATE TABLE subdepartments (
 CREATE TABLE beds (
     id SERIAL PRIMARY KEY,
     type VARCHAR(64) CHECK (type IN ('electrical', 'simple')),
-    sub_department_id INT REFERENCES subdepartments(id),
+    sub_department_id INT REFERENCES subdepartments(id), -- TODO: To check if the sub department this bed belongs to is the same as the doctor who visited a patient
     CONSTRAINT fk_bed_department FOREIGN KEY (sub_department_id) REFERENCES subdepartments(id)
 );
 
@@ -58,6 +58,8 @@ CREATE TABLE patients (
     sex_type VARCHAR(16) CHECK (sex_type IN ('male', 'female')),
     date_of_birth TIMESTAMP,
     address VARCHAR(256),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_patient_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id),
 );
 
@@ -88,11 +90,14 @@ CREATE TABLE prescriptions (
     medicine_id INT REFERENCES medicines(id) NOT NULL,
     doctor_id INT REFERENCES doctors(id) NOT NULL,
     reason VARCHAR(256),
-    frequency_hour INT, -- 1, 2, ... 24,
+    n_daily_usages INT, -- 1, 2, ... 24,
     amount NUMERIC(5,2),
+    dosage_unit VARCHAR(64), -- for example mg, ml, tablet
     type VARCHAR(64) CHECK (type IN ('intramuscular', 'oral'))
     start_date TIMESTAMP,
     end_date TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CHECK (start_date < end_date)
 )
 
@@ -102,8 +107,10 @@ CREATE TABLE intakes (
     prescription_id INT REFERENCES prescriptions(id),
     administered_at TIMESTAMP,
     administered_by INT REFERENCES doctors(id),
-    frequency_hour_given INT, -- 1, 2, ..., 24
-    amount_given NUMERIC(5,2),
+    amount_given NUMERIC(5,2), -- TODO: to check the amount_given <= amount for the parent prescription
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    
 )
 
 
