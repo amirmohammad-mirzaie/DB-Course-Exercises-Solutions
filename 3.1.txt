@@ -90,7 +90,7 @@ CREATE TABLE prescriptions (
     medicine_id INT REFERENCES medicines(id) NOT NULL,
     doctor_id INT REFERENCES doctors(id) NOT NULL,
     reason VARCHAR(256),
-    n_daily_usages INT, -- 1, 2, ... 24,
+    doses_per_day INT,
     amount NUMERIC(5,2),
     dosage_unit VARCHAR(64), -- for example mg, ml, tablet
     type VARCHAR(64) CHECK (type IN ('intramuscular', 'oral'))
