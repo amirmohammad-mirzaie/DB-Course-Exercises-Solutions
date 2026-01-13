@@ -174,6 +174,7 @@ EXECUTE FUNCTION calculate_renewal_price();
 
 -- TODO: Implement triggers to ensure that a new renewal contract does not overlap with any existing renewal contracts
 -- (for the same flat or a different flat), nor with any active rental contracts in the rental_contracts table.
+-- so we have to check if the contract is not overlapping with any previous renewal_contract, rental_contract or even purchase_contract
 
 -- TODO: To add a trigger that checks if a contract type is aligned with the corresponding flat
 
@@ -181,3 +182,5 @@ EXECUTE FUNCTION calculate_renewal_price();
 -- renewal contracts
 
 -- TODO: Add a constraint to check if the flat_id for the renewal contracts refer to the same flat from the original contract
+
+-- TODO: Add a trigger to update the status to 'expired' when the end_date < NOW()
