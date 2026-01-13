@@ -71,7 +71,7 @@ CREATE TABLE illnesses (
 CREATE TABLE patient_diagnoses (
     id SERIAL PRIMARY KEY,  
     patient_id INT REFERENCES patients(id),
-    illness_id INT REFERENCES ilnesses(id),
+    illness_id INT REFERENCES illnesses(id),
 
 )
 
