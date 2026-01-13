@@ -14,8 +14,8 @@ CREATE TABLE Employee (
 
 CREATE TABLE Department (
     Dno CHAR(12) PRIMARY KEY,
-    Dname VARCHAR(128),
-    manager_ssn CHAR(12) REFERENCES Employee(Ssn),
+    Dname VARCHAR(128) NOT NULL,
+    manager_ssn CHAR(12) REFERENCES Employee(Ssn) ON DELETE RESTRICT,
     manager_start_date TIMESTAMP NOT NULL
 );
 
@@ -28,21 +28,21 @@ CREATE TABLE Dept_locations (
 
 CREATE TABLE Project (
     Pnumber CHAR(12) PRIMARY KEY,
-    Pname VARCHAR(128),
+    Pname VARCHAR(128) NOT NULL,
     Plocation VARCHAR(128),
-    Dnum CHAR(12) REFERENCES Department(Dno)
+    Dnum CHAR(12) NOT NULL REFERENCES Department(Dno)
 );
 
 CREATE TABLE Works_on (
     Employee_ssn CHAR(12) REFERENCES Employee(Ssn),
     Pnumber CHAR(12) REFERENCES Project(Pnumber),
-    hours INT,
+    hours NUMERIC(5,2),
     PRIMARY KEY (Employee_ssn, Pnumber)
 );
 
 CREATE TABLE Dependent (
     Essn CHAR(12) REFERENCES Employee(Ssn),
-    Dependent_name VARCHAR(128) UNIQUE,
+    Dependent_name VARCHAR(128) NOT NULL,
     Gender VARCHAR(10) CHECK (Gender IN ('male', 'female')),
     Bdate TIMESTAMP,
     Relationship VARCHAR(128) CHECK (Relationship IN ('spouse', 'child', 'parent', 'sibling', 'other')),
