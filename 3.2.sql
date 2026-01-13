@@ -15,7 +15,7 @@ CREATE TABLE Employee (
 CREATE TABLE Department (
     Dno CHAR(12) PRIMARY KEY,
     Dname VARCHAR(128) NOT NULL,
-    manager_ssn CHAR(12) REFERENCES Employee(Ssn) ON DELETE RESTRICT,
+    manager_ssn CHAR(12) REFERENCES Employee(Ssn) ON DELETE SET NULL ON UPDATE CASCADE,
     manager_start_date TIMESTAMP NOT NULL
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE Project (
     Pnumber CHAR(12) PRIMARY KEY,
     Pname VARCHAR(128) NOT NULL,
     Plocation VARCHAR(128),
-    Dnum CHAR(12) NOT NULL REFERENCES Department(Dno)
+    Dno CHAR(12) NOT NULL REFERENCES Department(Dno)
 );
 
 CREATE TABLE Works_on (
@@ -49,7 +49,7 @@ CREATE TABLE Dependent (
     PRIMARY KEY (Essn, Dependent_name)
 );
 
-CREATE INDEX idx_project_dnum ON Project(Dnum);
+CREATE INDEX idx_project_Dno ON Project(Dno);
 CREATE INDEX idx_department_manager_ssn ON Department(manager_ssn);
 CREATE INDEX idx_employee_super_ssn ON Employee(Super_ssn);
 CREATE INDEX idx_employee_dno ON Employee(Dno);
