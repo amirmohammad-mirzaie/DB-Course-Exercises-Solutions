@@ -113,8 +113,26 @@ CREATE TABLE intakes (
     
 )
 
+CREATE OR REPLACE FUNCTION check_intake_date()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.administered_at < (SELECT start_date FROM prescriptions WHERE id = NEW.prescription_id)
+       OR NEW.administered_at > (SELECT end_date FROM prescriptions WHERE id = NEW.prescription_id)
+    THEN
+        RAISE EXCEPTION 'Intake date must be between prescription start and end dates.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_check_intake_date
+BEFORE INSERT OR UPDATE ON intakes
+FOR EACH ROW
+EXECUTE FUNCTION check_intake_date();
 
 
 -- TODO: To set constraints for checking if the bed id is in the sub department id
 -- TODO: TO set constraints for checking the sub department is inside a department
 -- TODO: TO add indices for the primary keys and foreign keys
+-- TODO: To add a check that validates the intakes is between the start date and the end date for a prescription
