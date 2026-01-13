@@ -1,0 +1,55 @@
+
+CREATE TABLE Employee (
+    Ssn CHAR(12) PRIMARY KEY,
+    fname VARCHAR(128),
+    lname VARCHAR(128),
+    Bdate TIMESTAMP,
+    Address VARCHAR(256),
+    Gender VARCHAR CHECK (Gender In ('male', 'female')),
+    salary NUMERIC(15,2),
+    Super_ssn CHAR(12) REFERENCES Employee(Ssn) ON DELETE SET NULL ON UPDATE CASCADE,
+    Dno CHAR(12) NOT NULL REFERENCES Department(Dno)
+);
+
+
+CREATE TABLE Department (
+    Dno CHAR(12) PRIMARY KEY,
+    Dname VARCHAR(128),
+    manager_ssn CHAR(12) REFERENCES Employee(Ssn),
+    manager_start_date TIMESTAMP NOT NULL
+);
+
+
+CREATE TABLE Dept_locations (
+    Dno CHAR(12) REFERENCES Department(Dno),
+    Dlocation VARCHAR(256) NOT NULL,
+    PRIMARY KEY (Dno, Dlocation)
+);
+
+CREATE TABLE Project (
+    Pnumber CHAR(12) PRIMARY KEY,
+    Pname VARCHAR(128),
+    Plocation VARCHAR(128),
+    Dnum CHAR(12) REFERENCES Department(Dno)
+);
+
+CREATE TABLE Works_on (
+    Employee_ssn CHAR(12) REFERENCES Employee(Ssn),
+    Pnumber CHAR(12) REFERENCES Project(Pnumber),
+    hours INT,
+    PRIMARY KEY (Employee_ssn, Pnumber)
+);
+
+CREATE TABLE Dependent (
+    Essn CHAR(12) REFERENCES Employee(Ssn),
+    Dependent_name VARCHAR(128) UNIQUE,
+    Gender VARCHAR(10) CHECK (Gender IN ('male', 'female')),
+    Bdate TIMESTAMP,
+    Relationship VARCHAR(128) CHECK (Relationship IN ('spouse', 'child', 'parent', 'sibling', 'other')),
+    PRIMARY KEY (Essn, Dependent_name)
+);
+
+CREATE INDEX idx_project_dnum ON Project(Dnum);
+CREATE INDEX idx_department_manager_ssn ON Department(manager_ssn);
+CREATE INDEX idx_employee_super_ssn ON Employee(Super_ssn);
+CREATE INDEX idx_employee_dno ON Employee(Dno);
