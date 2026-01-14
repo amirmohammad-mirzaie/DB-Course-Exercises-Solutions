@@ -128,7 +128,7 @@ INSERT INTO Dependent (Essn, Dependent_name, Gender, Bdate, Relationship) VALUES
 
 
 -------------------------------------
---- QUESTION 3.2 creating views -----
+--- QUESTION 2 creating views -----
 -------------------------------------
 
 
@@ -193,7 +193,7 @@ CREATE VIEW projects_with_more_than_1_employee AS (
 
 
 ---------------------------------------------------------------------
---- QUESTION 3.3 Checking if we can delete and select from VIEW -----
+--- QUESTION 3 Checking if we can delete and select from VIEW -----
 ---------------------------------------------------------------------
 Create View DEPT_SUMMARY(D,C, Total_s,Average_s)
 As Select Dno , COUNT(*) , SUM(salary) , AVG(salary)
