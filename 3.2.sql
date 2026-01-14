@@ -172,14 +172,20 @@ ORDER BY p.pnumber;
 --------------------------------------------------
 -- here we assume that the department name are unique
 DROP VIEW IF EXISTS projects_with_more_than_1_employee;
-CREATE VIEW projects_with_more_than_1_employee AS
-SELECT
-    p.pnumber AS project_number,
-    dep.dno AS department_number,
-    MAX(dep.dname) AS department_name,
-    COUNT(wo.employee_ssn) AS n_assigned_employees
-FROM project p
-LEFT JOIN department dep ON (p.dno = dep.dno)
-LEFT JOIN works_on wo ON (wo.pnumber = p.pnumber)
-GROUP BY (p.pnumber), dep.dno
-HAVING COUNT(wo.employee_ssn) > 1;
+
+CREATE VIEW projects_with_more_than_1_employee AS (
+    WITH project_employee_count AS (
+        SELECT
+            p.pnumber AS project_number,
+            dep.dno AS department_number,
+            MAX(dep.dname) AS department_name,
+            COUNT(wo.employee_ssn) AS n_assigned_employees
+        FROM project p
+        LEFT JOIN department dep ON (p.dno = dep.dno)
+        LEFT JOIN works_on wo ON (wo.pnumber = p.pnumber)
+        GROUP BY (p.pnumber), dep.dno
+    )
+    SELECT *
+    FROM project_employee_count
+    WHERE n_assigned_employees > 1
+);
