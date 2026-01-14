@@ -1,0 +1,72 @@
+
+-- Create the Hotel table
+CREATE TABLE Hotel (
+    hotelNo SERIAL PRIMARY KEY,
+    hotelName VARCHAR(100) NOT NULL,
+    city VARCHAR(50) NOT NULL
+);
+
+-- Create the Guest table
+CREATE TABLE Guest (
+    guestNo SERIAL PRIMARY KEY,
+    guestName VARCHAR(100) NOT NULL,
+    guestAddress TEXT
+);
+
+-- Create the Room table
+CREATE TABLE Room (
+    roomNo SERIAL PRIMARY KEY,
+    hotelNo INT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (hotelNo) REFERENCES Hotel(hotelNo) ON DELETE CASCADE
+);
+
+-- Create the Booking table
+CREATE TABLE Booking (
+    hotelNo INT NOT NULL,
+    guestNo INT NOT NULL,
+    dateFrom DATE NOT NULL,
+    dateTo DATE NOT NULL,
+    roomNo INT NOT NULL,
+    PRIMARY KEY (hotelNo, guestNo, dateFrom),
+    FOREIGN KEY (hotelNo) REFERENCES Hotel(hotelNo) ON DELETE CASCADE,
+    FOREIGN KEY (guestNo) REFERENCES Guest(guestNo) ON DELETE CASCADE,
+    FOREIGN KEY (roomNo) REFERENCES Room(roomNo) ON DELETE CASCADE,
+    CHECK (dateFrom <= dateTo)
+);
+
+
+
+-- Insert sample data into Hotel table
+INSERT INTO Hotel (hotelName, city) VALUES
+('Grand Plaza Hotel', 'London'),
+('Sunset Inn', 'Paris'),
+('Ocean View Resort', 'Sydney');
+
+-- Insert sample data into Guest table
+INSERT INTO Guest (guestName, guestAddress) VALUES
+('Alice Johnson', '123 Main St, London, UK'),
+('Bob Smith', '456 Elm St, Paris, France'),
+('Carol White', '789 Oak Ave, Sydney, Australia'),
+('David Brown', '101 Pine Rd, London, UK'),
+('Eva Green', '202 Maple Dr, Paris, France');
+
+-- Insert sample data into Room table
+INSERT INTO Room (hotelNo, type, price) VALUES
+(1, 'Single', 85.00),     -- Grand Plaza Hotel
+(1, 'Double', 120.00),    -- Grand Plaza Hotel
+(1, 'Suite', 250.00),     -- Grand Plaza Hotel
+(2, 'Single', 75.00),     -- Sunset Inn
+(2, 'Double', 110.00),    -- Sunset Inn
+(3, 'Suite', 300.00);     -- Ocean View Resort
+
+-- Insert sample data into Booking table
+INSERT INTO Booking (hotelNo, guestNo, dateFrom, dateTo, roomNo) VALUES
+(1, 1, '2024-06-01', '2024-06-05', 1),  -- Alice books Single room at Grand Plaza
+(2, 2, '2024-06-03', '2024-06-07', 4),  -- Bob books Single room at Sunset Inn
+(1, 3, '2024-06-10', '2024-06-15', 2),  -- Carol books Double room at Grand Plaza
+(3, 4, '2024-06-12', '2024-06-18', 6);  -- David books Suite at Ocean View Resort
+
+------------------------------------------------------------------------
+-- TRIGGERS -----------------------------------------------------------
