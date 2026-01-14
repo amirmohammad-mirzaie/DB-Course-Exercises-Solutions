@@ -116,3 +116,76 @@ INSERT INTO Dependent (Essn, Dependent_name, Gender, Bdate, Relationship) VALUES
 ('20', 'Sina Ahmadi', 'male', '1392-01-30', 'child'),
 ('16', 'Hossein Donyavi', 'male', '1378-07-01', 'spouse'),
 ('16', 'Neda Donyavi', 'female', '1398-12-25', 'child');
+
+---------------------------------------------------------------------------
+-------------------------- regarding answering questions ------------------
+---------------------------------------------------------------------------
+
+
+-- گراف ارجاع -----
+
+
+
+
+-------------------------
+--- creating views -----
+------------------------
+
+
+-- i----
+
+DROP VIEW IF EXISTS departent_manger_info;
+CREATE VIEW departent_manger_info AS
+SELECT 
+    dep.dno,
+    dep.dname,
+    dep.manager_ssn,
+    CONCAT(manager.fname, ' ', manager.lname) AS full_name,
+    manager.salary
+
+FROM department dep
+LEFT JOIN employee manager ON dep.manager_ssn = manager.ssn;
+
+-- ii --
+DROP VIEW IF EXISTS project_details;
+
+-- query 1 --
+CREATE VIEW project_details AS
+SELECT 
+    prj_dep.pnumber,
+    prj_dep.pname,
+    prj_dep.dno,
+    wo.employee_ssn,
+    wo.pnumber AS we_pnumber,
+    wo.hours
+FROM 
+    (
+        SELECT 
+            p.pnumber,
+            p.pname,
+            d.dno
+
+        FROM project p
+        LEFT JOIN department d ON (p.dno = d.dno)
+    ) AS prj_dep
+
+LEFT JOIN works_on wo ON (wo.pnumber = prj_dep.pnumber);
+
+
+
+
+
+-- query 2 --
+DROP VIEW IF EXISTS project_details;
+
+CREATE VIEW project_details AS
+SELECT 
+    p.pnumber,
+    p.pname,
+    dep.dno,
+    wo.employee_ssn,
+    wo.hours
+FROM 
+    project p
+LEFT JOIN department dep ON p.dno = dep.dno
+LEFT JOIN works_on wo ON (wo.pnumber = p.pnumber);
