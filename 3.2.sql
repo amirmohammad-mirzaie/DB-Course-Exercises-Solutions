@@ -97,7 +97,7 @@ INSERT INTO Dept_locations (Dno, Dlocation) VALUES
 
 -- Insert Works_on data
 INSERT INTO Works_on (Employee_ssn, Pnumber, hours) VALUES
-('1', 'P1', 10.5),
+('1', 'P2', 10.5),
 ('10', 'P1', 20.0),
 ('5', 'P2', 15.0),
 ('20', 'P2', 30.0),
@@ -145,47 +145,41 @@ SELECT
 
 FROM department dep
 LEFT JOIN employee manager ON dep.manager_ssn = manager.ssn;
+--------------------------------------------------
+-- ii --------------------------------------------
+--------------------------------------------------
 
--- ii --
+-- here we assume that the project names are unique
 DROP VIEW IF EXISTS project_details;
-
--- query 1 --
 CREATE VIEW project_details AS
 SELECT 
-    prj_dep.pnumber,
-    prj_dep.pname,
-    prj_dep.dno,
-    wo.employee_ssn,
-    wo.pnumber AS we_pnumber,
-    wo.hours
-FROM 
-    (
-        SELECT 
-            p.pnumber,
-            p.pname,
-            d.dno
-
-        FROM project p
-        LEFT JOIN department d ON (p.dno = d.dno)
-    ) AS prj_dep
-
-LEFT JOIN works_on wo ON (wo.pnumber = prj_dep.pnumber);
-
-
-
-
-
--- query 2 --
-DROP VIEW IF EXISTS project_details;
-
-CREATE VIEW project_details AS
-SELECT 
-    p.pnumber,
-    p.pname,
-    dep.dno,
-    wo.employee_ssn,
-    wo.hours
+    p.pnumber AS project_number,
+    MAX(p.pname) AS project_name,
+    MAX(dep.dno) AS department_number,
+    COUNT(wo.employee_ssn) AS n_assigned_employees,
+    SUM(wo.hours) AS n_total_hours
 FROM 
     project p
 LEFT JOIN department dep ON p.dno = dep.dno
-LEFT JOIN works_on wo ON (wo.pnumber = p.pnumber);
+LEFT JOIN works_on wo ON (wo.pnumber = p.pnumber)
+GROUP BY p.pnumber
+ORDER BY p.pnumber;
+
+
+
+--------------------------------------------------
+-- iii --------------------------------------------
+--------------------------------------------------
+-- here we assume that the department name are unique
+DROP VIEW IF EXISTS projects_with_more_than_1_employee;
+CREATE VIEW projects_with_more_than_1_employee AS
+SELECT
+    p.pnumber AS project_number,
+    dep.dno AS department_number,
+    MAX(dep.dname) AS department_name,
+    COUNT(wo.employee_ssn) AS n_assigned_employees
+FROM project p
+LEFT JOIN department dep ON (p.dno = dep.dno)
+LEFT JOIN works_on wo ON (wo.pnumber = p.pnumber)
+GROUP BY (p.pnumber), dep.dno
+HAVING COUNT(wo.employee_ssn) > 1;
