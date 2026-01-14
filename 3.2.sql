@@ -7,8 +7,7 @@ CREATE TABLE Employee (
     Address VARCHAR(256),
     Gender VARCHAR CHECK (Gender In ('male', 'female')),
     salary NUMERIC(15,2),
-    Super_ssn CHAR(12) REFERENCES Employee(Ssn) ON DELETE SET NULL ON UPDATE CASCADE,
-    Dno CHAR(12) NOT NULL REFERENCES Department(Dno)
+    Super_ssn CHAR(12) REFERENCES Employee(Ssn) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 
@@ -19,6 +18,7 @@ CREATE TABLE Department (
     manager_start_date TIMESTAMP NOT NULL
 );
 
+ALTER TABLE Employee ADD COLUMN Dno CHAR(12) NOT NULL REFERENCES Department(Dno);
 
 CREATE TABLE Dept_locations (
     Dno CHAR(12) REFERENCES Department(Dno),
