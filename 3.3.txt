@@ -70,3 +70,20 @@ INSERT INTO Booking (hotelNo, guestNo, dateFrom, dateTo, roomNo) VALUES
 
 ------------------------------------------------------------------------
 -- TRIGGERS -----------------------------------------------------------
+CREATE OR REPLACE FUNCTION cannot_have_reserve_with_overlap()
+RETURNS TRIGGER AS $$
+DECLARE 
+    some_variable NUMERIC(5,2)
+BEGIN
+
+
+    ...
+
+    RETURN NEW;
+END;
+$$LANGUAGE plpgsql;
+
+
+SELECT * 
+FROM guest g
+LEFT JOIN booking b ON (g.guestNo = booking.guestNo)
