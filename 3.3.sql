@@ -73,17 +73,26 @@ INSERT INTO Booking (hotelNo, guestNo, dateFrom, dateTo, roomNo) VALUES
 CREATE OR REPLACE FUNCTION cannot_have_reserve_with_overlap()
 RETURNS TRIGGER AS $$
 DECLARE 
-    some_variable NUMERIC(5,2)
+    overlap_count INT;
 BEGIN
-
-
-    ...
+    SELECT COUNT(*) INTO overlap_count
+    FROM booking b 
+    WHERE 
+        b.guestno = NEW.guestno AND 
+        b.dateto > NEW.datefrom AND
+        b.datefrom < NEW.dateto;
+    
+    IF overlap_count > 0 THEN
+        RAISE EXCEPTION 'Cannot register new booking since the guest alreay has another active booking'
+    END IF;
 
     RETURN NEW;
+    
 END;
 $$LANGUAGE plpgsql;
 
 
-SELECT * 
-FROM guest g
-LEFT JOIN booking b ON (g.guestNo = booking.guestNo)
+CREATE TRIGGER trg_cannot_have_reserve_with_overlap
+BEFORE INSERT OR UPDATE ON booking
+FOR EACH ROW
+EXECUTE FUNCTION cannot_have_reserve_with_overlap();
