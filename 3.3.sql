@@ -79,11 +79,13 @@ BEGIN
     FROM booking b 
     WHERE 
         b.guestno = NEW.guestno AND 
-        b.dateto > NEW.datefrom AND
-        b.datefrom < NEW.dateto;
+        b.dateto >= NEW.datefrom AND
+        b.datefrom <= NEW.dateto AND
+        (b.hotelNo, b.guestNo, b.dateFrom) != (NEW.hotelNo, NEW.guestNo, NEW.dateFrom);
+
     
     IF overlap_count > 0 THEN
-        RAISE EXCEPTION 'Cannot register new booking since the guest alreay has another active booking'
+        RAISE EXCEPTION 'Cannot register new booking since the guest alreay has another active booking';
     END IF;
 
     RETURN NEW;
@@ -96,3 +98,4 @@ CREATE TRIGGER trg_cannot_have_reserve_with_overlap
 BEFORE INSERT OR UPDATE ON booking
 FOR EACH ROW
 EXECUTE FUNCTION cannot_have_reserve_with_overlap();
+
