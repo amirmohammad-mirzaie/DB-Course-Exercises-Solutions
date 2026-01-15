@@ -67,7 +67,10 @@ INSERT INTO Booking (hotelNo, guestNo, dateFrom, dateTo, roomNo) VALUES
 (2, 2, '2024-06-03', '2024-06-07', 4),  -- Bob books Single room at Sunset Inn
 (1, 3, '2024-06-10', '2024-06-15', 2),  -- Carol books Double room at Grand Plaza
 (3, 4, '2024-06-12', '2024-06-18', 6);  -- David books Suite at Ocean View Resort
+DELETE FROM booking WHERE hotelno=1 and guestno=2 and dateFrom='2024-06-02';
 
+DROP TRIGGER IF EXISTS trg_cannot_reserve_again_the_already_reserved_room ON booking;
+DROP TRIGGER IF EXISTS trg_cannot_have_reserve_with_overlap ON booking;
 ------------------------------------------------------------------------
 -- TRIGGERS -----------------------------------------------------------
 CREATE OR REPLACE FUNCTION cannot_have_reserve_with_overlap()
