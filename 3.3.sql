@@ -96,6 +96,33 @@ BEGIN
 END;
 $$LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION cannot_reserve_again_the_already_reserved_room()
+RETURNS TRIGGER AS $$
+DECLARE
+    overlap_room_count INT;
+BEGIN
+    SELECT COUNT(*) INTO overlap_room_count
+    FROM booking b
+    WHERE 
+        NEW.hotelNo = b.hotelNo AND 
+        NEW.roomNo = b.roomNo AND
+        NEW.dateFrom <= b.dateTo AND
+        NEW.dateTo >= b.dateFrom AND
+        (NEW.hotelNo, New.guestNo, New.dateFrom) != (b.hotelNo, b.guestNo, b.dateFrom);
+    IF overlap_room_count > 0 THEN
+        RAISE EXCEPTION 'Cannot reserve the already reserved room';
+    END IF;
+    RETURN NEW;
+END;
+$$LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_cannot_reserve_again_the_already_reserved_room
+BEFORE INSERT OR UPDATE ON booking
+FOR EACH ROW
+EXECUTE FUNCTION cannot_reserve_again_the_already_reserved_room();
+
+
 
 CREATE TRIGGER trg_cannot_have_reserve_with_overlap
 BEFORE INSERT OR UPDATE ON booking
