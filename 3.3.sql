@@ -71,8 +71,15 @@ DELETE FROM booking WHERE hotelno=1 and guestno=2 and dateFrom='2024-06-02';
 
 DROP TRIGGER IF EXISTS trg_cannot_reserve_again_the_already_reserved_room ON booking;
 DROP TRIGGER IF EXISTS trg_cannot_have_reserve_with_overlap ON booking;
+DROP TRIGGER IF EXISTS trg_price_for_two_person_room_more_than_the_most_expensive_1_person_room ON room;
+
 ------------------------------------------------------------------------
 -- TRIGGERS -----------------------------------------------------------
+
+
+----------------------------------
+--- 3.3.1 -------------------------
+------------------------------
 CREATE OR REPLACE FUNCTION cannot_have_reserve_with_overlap()
 RETURNS TRIGGER AS $$
 DECLARE 
@@ -96,6 +103,11 @@ BEGIN
 END;
 $$LANGUAGE plpgsql;
 
+
+----------------------------------
+--- 3.3.2 -------------------------
+------------------------------
+
 CREATE OR REPLACE FUNCTION cannot_reserve_again_the_already_reserved_room()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -117,15 +129,49 @@ END;
 $$LANGUAGE plpgsql;
 
 
+----------------------------------
+--- 3.3.3 -------------------------
+------------------------------
+
+CREATE OR REPLACE FUNCTION price_for_two_person_room_more_than_the_most_expensive_1_person_room()
+RETURNS TRIGGER AS $$
+DECLARE
+    most_expensive_1_person_room_price NUMERIC(15,2);
+BEGIN
+    
+    IF NEW.type != 'Double' THEN
+        RETURN NEW;
+    END IF;
+
+    SELECT 
+        MAX(r.price) INTO most_expensive_1_person_room_price
+    FROM room r
+    WHERE 
+        r.type = 'Single' AND
+        r.hotelNo = NEW.hotelNo;
+    IF NEW.price <= most_expensive_1_person_room_price THEN
+        RAISE EXCEPTION 'the price for a 2-person room cannot be less than the maximum price for a 1-person room';
+    END IF;
+    RETURN NEW;
+END;
+$$LANGUAGE plpgsql;
+
+
+
+
+CREATE TRIGGER trg_price_for_two_person_room_more_than_the_most_expensive_1_person_room
+BEFORE INSERT OR UPDATE ON room
+FOR EACH ROW
+EXECUTE FUNCTION price_for_two_person_room_more_than_the_most_expensive_1_person_room();
+ 
 CREATE TRIGGER trg_cannot_reserve_again_the_already_reserved_room
 BEFORE INSERT OR UPDATE ON booking
 FOR EACH ROW
 EXECUTE FUNCTION cannot_reserve_again_the_already_reserved_room();
 
-
-
 CREATE TRIGGER trg_cannot_have_reserve_with_overlap
 BEFORE INSERT OR UPDATE ON booking
 FOR EACH ROW
 EXECUTE FUNCTION cannot_have_reserve_with_overlap();
+
 
