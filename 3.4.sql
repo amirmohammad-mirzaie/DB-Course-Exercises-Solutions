@@ -6,6 +6,12 @@ CREATE TABLE Student (
     age INT
 );
 
+CREATE TABLE Faculty (
+    fid INTEGER PRIMARY KEY,
+    fname VARCHAR(255),
+    deptid INTEGER
+);
+
 CREATE TABLE Class (
     name VARCHAR(255) PRIMARY KEY,
     meets_at TIME,
@@ -22,12 +28,6 @@ CREATE TABLE Enrolled (
     FOREIGN KEY (cname) REFERENCES Class(name)
 );
 
-CREATE TABLE Faculty (
-    fid INTEGER PRIMARY KEY,
-    fname VARCHAR(255),
-    deptid INTEGER
-);
-
 
 INSERT INTO Faculty (fid, fname, deptid) VALUES
 (101, 'Dr. Alice Johnson', 201),
@@ -35,11 +35,21 @@ INSERT INTO Faculty (fid, fname, deptid) VALUES
 (103, 'Dr. Carol White', 201),
 (104, 'Prof. David Lee', 203);
 
+
+INSERT INTO Faculty (fid, fname, deptid) VALUES
+(105, 'Dr. James Johnson', 202);
+
+
 INSERT INTO Class (name, meets_at, room, fid) VALUES
 ('CS101', '09:00:00', 'A101', 101),
 ('MATH205', '10:30:00', 'B202', 102),
 ('PHYS102', '14:00:00', 'C303', 103),
 ('ENG301', '11:00:00', 'D404', 104);
+
+
+INSERT INTO Class (name, meets_at, room, fid) VALUES
+('CS102', '16:00:00', 'A102', 101);
+
 
 INSERT INTO Student (snum, sname, major, level, age) VALUES
 (1001, 'John Doe', 'Computer Science', 'Freshman', 18),
@@ -58,3 +68,50 @@ INSERT INTO Enrolled (snum, cname) VALUES
 (1004, 'ENG301'),
 (1005, 'CS101'),
 (1005, 'ENG301');
+
+-- 3.4.1 ----
+-- sql query ---
+SELECT * FROM
+(
+    SELECT
+        COUNT(snum) AS n_students,
+        cname
+    FROM enrolled
+    GROUP BY cname
+)
+WHERE n_students < 5 OR n_students > 30;
+
+--- trigger ---     
+CREATE OR REPLACE FUNCTION n_students_not_more_than_30()
+RETURNS TRIGGER AS $$
+DECLARE 
+    n_students INT;
+BEGIN
+
+    SELECT 
+        COUNT(*) INTO n_students
+    FROM enrolled
+    WHERE cname = NEW.cname;
+
+    IF n_students > 30 THEN
+        RAISE EXCEPTION 'class is full';
+    END IF
+
+    RETURN NEW;
+
+CREATE TRIGGER trg_n_students_not_more_than_30
+BEFORE INSERT OR UPDATE ON enrolled
+FOR EACH ROW
+EXECUTE FUNCTION n_students_not_more_than_30();
+
+----- 3.4.2 ---------------
+---- sql query ------------
+SELECT
+    f.fid AS faculty_id,
+    COUNT(c.name) AS no_of_courses
+
+FROM faculty f
+LEFT JOIN class c ON f.fid = c.fid
+GROUP BY f.fid
+HAVING COUNT(c.name) < 2;
+
