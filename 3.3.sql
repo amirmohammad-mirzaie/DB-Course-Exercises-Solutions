@@ -26,8 +26,8 @@ CREATE TABLE Room (
 CREATE TABLE Booking (
     hotelNo INT NOT NULL,
     guestNo INT NOT NULL,
-    dateFrom DATE NOT NULL,
-    dateTo DATE NOT NULL,
+    dateFrom DATETIME NOT NULL,
+    dateTo DATETIME NOT NULL,
     roomNo INT NOT NULL,
     PRIMARY KEY (hotelNo, guestNo, dateFrom),
     FOREIGN KEY (hotelNo) REFERENCES Hotel(hotelNo) ON DELETE CASCADE,
@@ -35,7 +35,6 @@ CREATE TABLE Booking (
     FOREIGN KEY (roomNo) REFERENCES Room(roomNo) ON DELETE CASCADE,
     CHECK (dateFrom <= dateTo)
 );
-
 
 
 -- Insert sample data into Hotel table
@@ -234,7 +233,32 @@ EXECUTE FUNCTION store_date_from_for_date_to_before_registering_a_booking();
 
 CREATE OR REPLACE FUNCTION no_booking_before_23_to_23_15()
 RETURNS TRIGGER AS $$
+DECLARE 
+    start_hour INT;
+    start_minute INT;
+    end_hour INT;
+    end_minute INT;
 
 BEGIN
+    start_hour := EXTRACT(HOUR FROM NEW.dateFrom);
+    start_minute := EXTRACT(MINUTE FROM NEW.dateFrom);
+
+    end_hour := EXTRACT(HOUR FROM NEW.dateTo);
+    end_minute := EXTRACT(MINUTE FROM NEW.dateTo);
+
+    IF (NEW.datefrom::TIME <= '23:15:00' AND NEW.dateFrom::TIME >= '23:00:00') OR 
+    (NEW.dateTo::TIME <= '23:15:00' AND NEW.dateTo::TIME >= '23:00:00') THEN
+        RAISE EXCEPTION 'Booking overlaps forbidden time window (23:00 - 23:15)';
+    END IF;
+
+
+
     RETURN NEW;
+END;
+$$LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_no_booking_before_23_to_23_15
+BEFORE INSERT ON Booking
+FOR EACH ROW
+EXECUTE FUNCTION no_booking_before_23_to_23_15();
 
