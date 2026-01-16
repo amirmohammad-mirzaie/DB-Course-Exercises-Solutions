@@ -67,11 +67,12 @@ INSERT INTO Booking (hotelNo, guestNo, dateFrom, dateTo, roomNo) VALUES
 (2, 2, '2024-06-03', '2024-06-07', 4),  -- Bob books Single room at Sunset Inn
 (1, 3, '2024-06-10', '2024-06-15', 2),  -- Carol books Double room at Grand Plaza
 (3, 4, '2024-06-12', '2024-06-18', 6);  -- David books Suite at Ocean View Resort
-DELETE FROM booking WHERE hotelno=1 and guestno=2 and dateFrom='2024-06-02';
+
 
 DROP TRIGGER IF EXISTS trg_cannot_reserve_again_the_already_reserved_room ON booking;
 DROP TRIGGER IF EXISTS trg_cannot_have_reserve_with_overlap ON booking;
 DROP TRIGGER IF EXISTS trg_price_for_two_person_room_more_than_the_most_expensive_1_person_room ON room;
+DROP TRIGGER IF EXISTS trg_store_in_file_before_deleting_bookings ON booking;
 
 ------------------------------------------------------------------------
 -- TRIGGERS -----------------------------------------------------------
@@ -181,9 +182,27 @@ EXECUTE FUNCTION price_for_two_person_room_more_than_the_most_expensive_1_person
 ------------------------------
 CREATE OR REPLACE FUNCTION store_in_file_before_deleting_bookings()
 RETURNS TRIGGER AS $$
+DECLARE
+    log_file_path TEXT := 'log-booking-deleted.txt';
+    log_line TEXT;
 
 BEGIN
-    DELETE
+    log_line := format(
+        'Deleted Booking: hotelNo:$s, guestNo:$s, dateFrom:$s, dateTo:$s, roomNo:$s', 
+        OLD.hotelNo, OLD.guestNo, OLD.dateFrom, OLD.dateTo, OLD.roomNo
+    );
+
+    PERFORM pg_write_file(log_file_path, log_line || E'\n', true);
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_store_in_file_before_deleting_bookings
+BEFORE DELETE ON booking
+FOR EACH ROW
+EXECUTE FUNCTION store_in_file_before_deleting_bookings();
 
 ----------------------------------
 --- 3.3.5 -------------------------
@@ -206,8 +225,5 @@ CREATE OR REPLACE FUNCTION no_booking_before_23_to_23_15()
 RETURNS TRIGGER AS $$
 
 BEGIN
-
-    IF NEW.dateFrom
-    NEW.dateTo = NEW.dateFrom;
     RETURN NEW;
 
