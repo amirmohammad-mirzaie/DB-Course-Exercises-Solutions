@@ -209,14 +209,20 @@ EXECUTE FUNCTION store_in_file_before_deleting_bookings();
 ----------------------------------
 
 CREATE OR REPLACE FUNCTION store_date_from_for_date_to_before_registering_a_booking()
-
 RETURNS TRIGGER AS $$
 
 BEGIN
     NEW.dateTo = NEW.dateFrom;
     RETURN NEW;
 
+END;
+$$ LANGUAGE plpgsql;
 
+-- Create the trigger to execute the function before INSERT on Booking
+CREATE TRIGGER trg_store_date_from_for_date_to_before_registering_a_booking
+BEFORE INSERT ON Booking
+FOR EACH ROW
+EXECUTE FUNCTION store_date_from_for_date_to_before_registering_a_booking();
 ----------------------------------
 --- 3.3.6 -------------------------
 ----------------------------------
