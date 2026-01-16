@@ -104,6 +104,13 @@ END;
 $$LANGUAGE plpgsql;
 
 
+CREATE TRIGGER trg_cannot_have_reserve_with_overlap
+BEFORE INSERT OR UPDATE ON booking
+FOR EACH ROW
+EXECUTE FUNCTION cannot_have_reserve_with_overlap();
+
+
+
 ----------------------------------
 --- 3.3.2 -------------------------
 ------------------------------
@@ -127,6 +134,12 @@ BEGIN
     RETURN NEW;
 END;
 $$LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_cannot_reserve_again_the_already_reserved_room
+BEFORE INSERT OR UPDATE ON booking
+FOR EACH ROW
+EXECUTE FUNCTION cannot_reserve_again_the_already_reserved_room();
 
 
 ----------------------------------
@@ -156,22 +169,45 @@ BEGIN
 END;
 $$LANGUAGE plpgsql;
 
-
-
-
 CREATE TRIGGER trg_price_for_two_person_room_more_than_the_most_expensive_1_person_room
 BEFORE INSERT OR UPDATE ON room
 FOR EACH ROW
 EXECUTE FUNCTION price_for_two_person_room_more_than_the_most_expensive_1_person_room();
- 
-CREATE TRIGGER trg_cannot_reserve_again_the_already_reserved_room
-BEFORE INSERT OR UPDATE ON booking
-FOR EACH ROW
-EXECUTE FUNCTION cannot_reserve_again_the_already_reserved_room();
 
-CREATE TRIGGER trg_cannot_have_reserve_with_overlap
-BEFORE INSERT OR UPDATE ON booking
-FOR EACH ROW
-EXECUTE FUNCTION cannot_have_reserve_with_overlap();
 
+
+----------------------------------
+--- 3.3.4 -------------------------
+------------------------------
+CREATE OR REPLACE FUNCTION store_in_file_before_deleting_bookings()
+RETURNS TRIGGER AS $$
+
+BEGIN
+    DELETE
+
+----------------------------------
+--- 3.3.5 -------------------------
+----------------------------------
+
+CREATE OR REPLACE FUNCTION store_date_from_for_date_to_before_registering_a_booking()
+
+RETURNS TRIGGER AS $$
+
+BEGIN
+    NEW.dateTo = NEW.dateFrom;
+    RETURN NEW;
+
+
+----------------------------------
+--- 3.3.6 -------------------------
+----------------------------------
+
+CREATE OR REPLACE FUNCTION no_booking_before_23_to_23_15()
+RETURNS TRIGGER AS $$
+
+BEGIN
+
+    IF NEW.dateFrom
+    NEW.dateTo = NEW.dateFrom;
+    RETURN NEW;
 
