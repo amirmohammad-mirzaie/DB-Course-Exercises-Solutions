@@ -69,6 +69,10 @@ INSERT INTO Booking (hotelNo, guestNo, dateFrom, dateTo, roomNo) VALUES
 (3, 4, '2024-06-12', '2024-06-18', 6);  -- David books Suite at Ocean View Resort
 
 
+INSERT INTO Booking (hotelNo, guestNo, dateFrom, roomNo) VALUES
+(1, 3, '2024-06-06', 1);  -- Alice books Single room at Grand Plaza
+
+
 DROP TRIGGER IF EXISTS trg_cannot_reserve_again_the_already_reserved_room ON booking;
 DROP TRIGGER IF EXISTS trg_cannot_have_reserve_with_overlap ON booking;
 DROP TRIGGER IF EXISTS trg_price_for_two_person_room_more_than_the_most_expensive_1_person_room ON room;
@@ -76,8 +80,6 @@ DROP TRIGGER IF EXISTS trg_store_in_file_before_deleting_bookings ON booking;
 
 ------------------------------------------------------------------------
 -- TRIGGERS -----------------------------------------------------------
-
-
 ----------------------------------
 --- 3.3.1 -------------------------
 ------------------------------
@@ -204,6 +206,7 @@ BEFORE DELETE ON booking
 FOR EACH ROW
 EXECUTE FUNCTION store_in_file_before_deleting_bookings();
 
+
 ----------------------------------
 --- 3.3.5 -------------------------
 ----------------------------------
@@ -214,15 +217,17 @@ RETURNS TRIGGER AS $$
 BEGIN
     NEW.dateTo = NEW.dateFrom;
     RETURN NEW;
-
 END;
-$$ LANGUAGE plpgsql;
+$$LANGUAGE plpgsql;
 
 -- Create the trigger to execute the function before INSERT on Booking
 CREATE TRIGGER trg_store_date_from_for_date_to_before_registering_a_booking
 BEFORE INSERT ON Booking
 FOR EACH ROW
 EXECUTE FUNCTION store_date_from_for_date_to_before_registering_a_booking();
+
+
+
 ----------------------------------
 --- 3.3.6 -------------------------
 ----------------------------------
