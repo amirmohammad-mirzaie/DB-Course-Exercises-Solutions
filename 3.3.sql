@@ -26,8 +26,8 @@ CREATE TABLE Room (
 CREATE TABLE Booking (
     hotelNo INT NOT NULL,
     guestNo INT NOT NULL,
-    dateFrom DATETIME NOT NULL,
-    dateTo DATETIME NOT NULL,
+    dateFrom TIMESTAMP NOT NULL,
+    dateTo TIMESTAMP NOT NULL,
     roomNo INT NOT NULL,
     PRIMARY KEY (hotelNo, guestNo, dateFrom),
     FOREIGN KEY (hotelNo) REFERENCES Hotel(hotelNo) ON DELETE CASCADE,
@@ -224,8 +224,6 @@ CREATE TRIGGER trg_store_date_from_for_date_to_before_registering_a_booking
 BEFORE INSERT ON Booking
 FOR EACH ROW
 EXECUTE FUNCTION store_date_from_for_date_to_before_registering_a_booking();
-
-
 
 ----------------------------------
 --- 3.3.6 -------------------------
