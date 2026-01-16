@@ -40,6 +40,10 @@ INSERT INTO Faculty (fid, fname, deptid) VALUES
 (105, 'Dr. James Johnson', 202);
 
 
+INSERT INTO Faculty (fid, fname, deptid) VALUES
+(106, 'Dr. Bob Johnson', 202);
+
+
 INSERT INTO Class (name, meets_at, room, fid) VALUES
 ('CS101', '09:00:00', 'A101', 101),
 ('MATH205', '10:30:00', 'B202', 102),
@@ -98,6 +102,8 @@ BEGIN
     END IF
 
     RETURN NEW;
+END;
+$$LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_n_students_not_more_than_30
 BEFORE INSERT OR UPDATE ON enrolled
@@ -115,3 +121,39 @@ LEFT JOIN class c ON f.fid = c.fid
 GROUP BY f.fid
 HAVING COUNT(c.name) < 2;
 
+----- 3.4.3 ---------------
+---- sql query ------------
+
+----- 3.4.4 ---------------
+---- sql query ------------
+
+----- 3.4.5 ---------------
+---- sql query ------------
+CREATE OR REPLACE FUNCTION no_overlap_class_locations()
+RETURNS TRIGGER AS $$
+DECLARE 
+    n_classes_in_the_same_room INT;
+    new_dept_id INT;
+BEGIN
+    
+    SELECT deptid INTO new_dept_id
+    FROM faculty 
+    WHERE fid = NEW.fid;
+
+    SELECT COUNT(*) INTO n_classes_in_the_same_room
+    FROM class c
+    WHERE NEW.meets_at = c.meets_at AND c.deptid = new_dept_id AND NEW.room = c.room AND c.name != NEW.name;
+
+    IF n_classes_in_the_same_room > 0 THEN
+        RAISE EXCEPTION 'class is already taken';
+    END IF;
+
+    RETURN NEW;
+END;
+$$LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_no_overlap_class_locations
+BEFORE INSERT OR UPDATE ON class
+FOR EACH ROW
+EXECUTE FUNCTION no_overlap_class_locations();
