@@ -112,14 +112,9 @@ WHERE c.city = e.city;
 -- 3.5.c --
 
 SELECT
-    e.person_name AS employee_name,
-    e.city AS employee_city,
-    e.street AS employee_street,
-
-    em.person_name AS manager_name_from_employee,
-    em.city AS manager_city,
-    em.street AS manager_street
-
+    e.person_name AS name,
+    e.city AS city,
+    e.street AS street
 FROM employee e
 JOIN manages m ON e.person_name = m.person_name
 JOIN employee em ON (m.manager_name = em.person_name AND e.city = em.city AND e.street = em.street);
