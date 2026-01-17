@@ -24,38 +24,43 @@ CREATE TABLE Manages (
     FOREIGN KEY (manager_name) REFERENCES Employee(person_name)
 );
 
+INSERT INTO Employee (person_name, street, city) VALUES ('Ali', 'Tehran St', 'Tehran');
+INSERT INTO Employee (person_name, street, city) VALUES ('Reza', 'Mashhad Ave', 'Mashhad');
+INSERT INTO Employee (person_name, street, city) VALUES ('Maryam', 'Isfahan Blvd', 'Isfahan');
+INSERT INTO Employee (person_name, street, city) VALUES ('Hossein', 'Tehran St', 'Tehran');
+INSERT INTO Employee (person_name, street, city) VALUES ('Sara', 'Shiraz St', 'Shiraz');
+INSERT INTO Employee (person_name, street, city) VALUES ('Mohammad', 'Tehran St', 'Tehran');
+INSERT INTO Employee (person_name, street, city) VALUES ('Narges', 'Mashhad Ave', 'Mashhad');
+INSERT INTO Employee (person_name, street, city) VALUES ('Ali Reza', 'Isfahan Blvd', 'Isfahan');
+INSERT INTO Employee (person_name, street, city) VALUES ('Farhad', 'Tehran St', 'Tehran');
+INSERT INTO Employee (person_name, street, city) VALUES ('Leila', 'Shiraz St', 'Shiraz');
 
--- Insert data into Employee table
-INSERT INTO Employee (person_name, street, city) VALUES
-('Alice Johnson', '123 Main St', 'New York'),
-('Bob Smith', '456 Oak Ave', 'Los Angeles'),
-('Carol Davis', '789 Pine Rd', 'Chicago'),
-('David Wilson', '321 Elm St', 'Houston'),
-('Eve Brown', '654 Maple Dr', 'Phoenix');
+INSERT INTO Company (company_name, city) VALUES ('Iranian', 'Tehran');
+INSERT INTO Company (company_name, city) VALUES ('Pars', 'Mashhad');
+INSERT INTO Company (company_name, city) VALUES ('Saba', 'Isfahan');
+INSERT INTO Company (company_name, city) VALUES ('Aria', 'Shiraz');
 
--- Insert data into Company table
-INSERT INTO Company (company_name, city) VALUES
-('TechCorp', 'New York'),
-('Innovate Inc.', 'Los Angeles'),
-('Global Solutions', 'Chicago'),
-('FutureTech', 'Houston'),
-('DataWorks', 'Phoenix');
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Ali', 'Iranian', 120000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Reza', 'Pars', 90000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Maryam', 'Saba', 110000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Hossein', 'Iranian', 130000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Sara', 'Aria', 85000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Mohammad', 'Iranian', 140000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Narges', 'Pars', 95000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Ali Reza', 'Saba', 105000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Farhad', 'Iranian', 150000);
+INSERT INTO Works (person_name, company_name, salary) VALUES ('Leila', 'Aria', 80000);
 
--- Insert data into Works table
-INSERT INTO Works (person_name, company_name, salary) VALUES
-('Alice Johnson', 'TechCorp', 85000.00),
-('Bob Smith', 'Innovate Inc.', 75000.00),
-('Carol Davis', 'Global Solutions', 90000.00),
-('David Wilson', 'FutureTech', 80000.00),
-('Eve Brown', 'DataWorks', 78000.00);
+INSERT INTO Manages (person_name, manager_name) VALUES ('Ali', 'Hossein');
+INSERT INTO Manages (person_name, manager_name) VALUES ('Reza', 'Hossein');
+INSERT INTO Manages (person_name, manager_name) VALUES ('Maryam', 'Mohammad');
+INSERT INTO Manages (person_name, manager_name) VALUES ('Hossein', 'Mohammad');
+INSERT INTO Manages (person_name, manager_name) VALUES ('Sara', 'Ali Reza');
+INSERT INTO Manages (person_name, manager_name) VALUES ('Mohammad', 'Farhad');
+INSERT INTO Manages (person_name, manager_name) VALUES ('Narges', 'Ali Reza');
+INSERT INTO Manages (person_name, manager_name) VALUES ('Ali Reza', 'Farhad');
+INSERT INTO Manages (person_name, manager_name) VALUES ('Leila', 'Ali Reza');
 
--- Insert data into Manages table
-INSERT INTO Manages (person_name, manager_name) VALUES
-('Alice Johnson', 'Bob Smith'),
-('Bob Smith', 'Carol Davis'),
-('Carol Davis', 'David Wilson'),
-('David Wilson', 'Eve Brown'),
-('Eve Brown', 'Alice Johnson');
 
 --- 3.5.a -----
 -- query 1 -- using WHERE after the joining
@@ -103,3 +108,20 @@ FROM employee e
 JOIN works w ON (w.person_name = e.person_name)
 JOIN company c ON (w.company_name = c.company_name)
 WHERE c.city = e.city;
+
+-- 3.5.c --
+
+SELECT
+    e.person_name AS employee_name,
+    e.city AS employee_city,
+    e.street AS employee_street,
+
+    em.person_name AS manager_name_from_employee,
+    em.city AS manager_city,
+    em.street AS manager_street
+
+FROM employee e
+JOIN manages m ON e.person_name = m.person_name
+JOIN employee em ON (m.manager_name = em.person_name AND e.city = em.city AND e.street = em.street);
+
+
