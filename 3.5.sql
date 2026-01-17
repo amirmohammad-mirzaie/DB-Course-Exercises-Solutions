@@ -58,15 +58,16 @@ INSERT INTO Manages (person_name, manager_name) VALUES
 ('Eve Brown', 'Alice Johnson');
 
 --- 3.5.a -----
+-- query 1 -- using WHERE after the joining
 SELECT 
     e.person_name,
     e.street,
     e.city,
     w.salary
 FROM employee e
-LEFT JOIN works w ON w.person_name = e.person_name
-LEFT JOIN company c ON w.company_name = c.company_name
-WHERE c.company_name = 'FutureTech' AND w.salary > 76000;
+JOIN works w ON w.person_name = e.person_name
+WHERE w.company_name = 'FutureTech' AND w.salary > 76000;
+-- query 2 -- using conditions inside the JOIN operation which is better in performance
 
 SELECT 
     e.person_name,
@@ -76,3 +77,29 @@ SELECT
     w.company_name
 FROM employee e
 JOIN works w ON (w.person_name = e.person_name AND w.salary > 76000 AND w.company_name = 'FutureTech');
+
+----- 3.5.b ------
+-- query 1 -- using conditions inside the JOIN --> better in performance
+SELECT 
+    e.person_name,
+    e.street,
+    e.city,
+    c.city AS company_city,
+    w.salary,
+    w.company_name
+FROM employee e
+JOIN works w ON (w.person_name = e.person_name)
+JOIN company c ON (w.company_name = c.company_name AND c.city = e.city);
+
+-- query 2 -- using WHERE clause after joining
+SELECT 
+    e.person_name,
+    e.street,
+    e.city,
+    c.city AS company_city,
+    w.salary,
+    w.company_name
+FROM employee e
+JOIN works w ON (w.person_name = e.person_name)
+JOIN company c ON (w.company_name = c.company_name)
+WHERE c.city = e.city;
