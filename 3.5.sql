@@ -120,3 +120,27 @@ JOIN manages m ON e.person_name = m.person_name
 JOIN employee em ON (m.manager_name = em.person_name AND e.city = em.city AND e.street = em.street);
 
 
+-- 3.5.d --
+ -- 1st algorithm --
+SELECT
+    *
+FROM employee e
+JOIN works w ON (e.person_name = w.person_name AND w.company_name != 'Iranian');
+
+-- 2nd algorithm --
+SELECT
+    *
+FROM employee e
+JOIN (
+    SELECT * FROM works w WHERE w.company_name != 'Iranian'
+) AS filtered_w ON e.person_name = filtered_w.person_name;
+
+
+-- 3rd algorithm --
+SELECT *
+FROM employee e
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM works w
+    WHERE w.person_name = e.person_name AND w.company_name = 'Iranian'
+);
