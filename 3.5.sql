@@ -144,3 +144,15 @@ WHERE NOT EXISTS (
     FROM works w
     WHERE w.person_name = e.person_name AND w.company_name = 'Iranian'
 );
+
+-- 3.5.e --
+SELECT
+    w.person_name,
+    w.company_name
+FROM works w
+WHERE w.company_name != 'Iranian' AND w.salary > (
+    SELECT
+    MAX(w.salary) AS max_salary
+    FROM works w
+    WHERE w.company_name = 'Iranian'
+);
