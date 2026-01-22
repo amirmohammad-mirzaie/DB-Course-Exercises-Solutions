@@ -69,3 +69,16 @@ CREATE TABLE research_assistants (
     UNIQUE(employee_id, student_id, professor_id)
 )
 
+
+CREATE TABLE graduates (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id),
+)
+
+CREATE TABLE certificates (
+    id SERIAL PRIMARY KEY,
+    date_received DATE,
+    department_id INT REFERENCES departments(id),
+    graduate_id INT REFERENCES graduates(id),
+    UNIQUE(graduate_id, department_id)
+)
