@@ -8,7 +8,7 @@ CREATE TABLE users(
     id SERIAL PRIMARY KEY,
     name VARCHAR(64),
     id_card_number VARCHAR(64) UNIQUE,
-    sex_type BOOLEAN,
+    gender BOOLEAN,
     date_born TIMESTAMP,
     address VARCHAR(1024),
     
