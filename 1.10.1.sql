@@ -14,9 +14,15 @@ CREATE TABLE users(
     
 )
 
+-- assuming a user can be student in different departments concurrently
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
-    student_id CHAR(10) UNIQUE
+    user_id INT REFERENCES users(id),
+    department_id INT REFERENCES departments(id),
+    level VARCHAR(8) CHECK (level IN ('bsc', 'msc', 'phd'))
+    start_date DATE,
+    end_date DATE,
+    UNIQUE(user_id, department_id)
 )
 
 
@@ -42,8 +48,6 @@ CREATE TABLE staffs (
 
 )
 
-
-
 CREATE TABLE courses(
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
@@ -51,19 +55,19 @@ CREATE TABLE courses(
     study_level VARCHAR(8) CHECK(study_level IN ('bsc', 'msc', 'phd')),
     instructor_id INT REFERENCES professors(id)
 )
-
+-- teaching assistants are TAs that teach courses to students
 CREATE TABLE teaching_assistants (
     id SERIAL PRIMARY KEY,
     employee_id INT REFERENCES employees(id),
     student_id INT REFERENCES students(id),
     course_id INT REFERENCES courses(id),
-    UNIQUE(employee_id, student_id, course_id)
+    UNIQUE(student_id, course_id)
 )
-
+-- research assistants are TAs who work with a professor on a research topic
 CREATE TABLE research_assistants (
     id SERIAL PRIMARY KEY,
     employee_id INT REFERENCES employees(id),
-    student_id INT REFERENCES students(id),
+    student_id INT REFERENCES base_student(id),
     professor_id INT REFERENCES professors(id),
     research_topic VARCHAR(256),
     UNIQUE(employee_id, student_id, professor_id)
@@ -72,13 +76,10 @@ CREATE TABLE research_assistants (
 
 CREATE TABLE graduates (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id),
-)
-
-CREATE TABLE certificates (
-    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id)
     date_received DATE,
+    degree_name VARCHAR(128),
     department_id INT REFERENCES departments(id),
     graduate_id INT REFERENCES graduates(id),
-    UNIQUE(graduate_id, department_id)
+    UNIQUE(user_id, department_id)
 )
