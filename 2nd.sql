@@ -541,7 +541,7 @@ ORDER BY post_score_avg DESC;
 
 -- CreationDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-CREATE TABLE Badges (
+CREATE TABLE IF NOT EXISTS Badges (
     Id SERIAL PRIMARY KEY,
     UserId INT REFERENCES Users(Id),
     Name VARCHAR(64),
@@ -562,38 +562,94 @@ INSERT INTO Badges (UserId, Name, Date, Class, TagBased) VALUES
 
 -- -- a list of user ids, the number of gold badges, and the count on posts
 
-
-
-SELECT
-    u.id AS user_id,
-    b.id AS badge_id,
-    (CASE 
-    WHEN b.class = 1 THEN 'Gold' 
-    WHEN b.class = 2 THEN 'Silver' 
-    WHEN b.class = 3 THEN 'Bronze' END) AS class_name,
-    p.id AS post_id
-FROM users u
-LEFT JOIN badges b 
-    ON b.userid = u.id
-LEFT JOIN posts p 
-    ON p.owneruserid = u.id
-ORDER BY user_id, post_id, badge_id;
-
-
-
-
-SELECT
-    u.id AS user_id,
+SELECT 
+    user_id,
+    MAX(badge_count) AS badge_count,
     COUNT(p.id) AS post_count
-FROM users u
-LEFT JOIN badges b 
-    ON b.userid = u.id AND b.class = 3
-LEFT JOIN posts p 
-    ON p.owneruserid = u.id
-WHERE (CASE 
-    WHEN b.class = 1 THEN 'Gold' 
-    WHEN b.class = 2 THEN 'Silver' 
-    WHEN b.class = 3 THEN 'Bronze' END) = 'Bronze'
+FROM
+(
+    SELECT
+        u.id AS user_id,
+        COUNT(b.class) AS badge_count
+    FROM users u
+    LEFT JOIN badges b ON b.userid = u.id AND b.class = 1
+    GROUP BY user_id
+) AS UserBadges
+LEFT JOIN posts p ON p.owneruserid = user_id
 GROUP BY user_id
-HAVING COUNT(p.id) > 0
 ORDER BY user_id;
+
+-- users with average score of their posts < 50
+SELECT 
+    u.id AS user_id,
+    AVG(p.score) AS average_score
+FROM users u
+LEFT JOIN (posts p JOIN posttypes pt ON p.posttypeid = pt.id AND pt.type = 'Answer') ON p.owneruserid = u.id
+GROUP BY user_id
+HAVING AVG(p.score) < 50
+ORDER BY user_id;
+
+
+-- users who only ask questions without sending any answers
+
+
+-- solution 1
+SELECT
+    u.id AS user_id,
+    COUNT(p.id) AS post_count,
+    SUM(CASE WHEN pt.type = 'Answer' THEN 1 ELSE 0 END) AS answer_count,
+    SUM(CASE WHEN pt.type = 'Question' THEN 1 ELSE 0 END) AS question_count
+FROM users u
+LEFT JOIN (posts p JOIN posttypes pt ON p.posttypeid = pt.id) ON p.owneruserid = u.id
+GROUP BY user_id
+HAVING SUM(CASE WHEN pt.type = 'Answer' THEN 1 ELSE 0 END) = 0
+       AND SUM(CASE WHEN pt.type = 'Question' THEN 1 ELSE 0 END) >= 0
+ORDER BY user_id;
+
+
+-- solution 2
+SELECT 
+    DISTINCT p.owneruserid
+FROM posts p
+WHERE p.posttypeid = 1
+AND p.owneruserid IS NOT NULL
+
+EXCEPT
+    SELECT 
+        DISTINCT p.OwnerUserId
+    FROM Posts p
+    WHERE PostTypeId = 2;
+
+-- users who do not have any badges
+SELECT *
+FROM users u
+LEFT JOIN badges b ON b.userid = u.id;
+
+
+
+-- users who do not have any badges
+-- solution 1
+SELECT
+    u.id AS user_id
+
+FROM users u
+LEFT JOIN badges b on b.userid = u.id
+GROUP BY u.id
+HAVING COUNT(b.id) = 0;
+
+-- solution 2
+SELECT
+    u.id AS user_id
+FROM users u
+
+EXCEPT
+
+(
+    SELECT
+        u.id AS user_id
+
+    FROM users u
+    LEFT JOIN badges b on b.userid = u.id
+    GROUP BY u.id
+    HAVING COUNT(b.id) > 0
+)
