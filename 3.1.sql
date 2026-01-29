@@ -1,8 +1,8 @@
 
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
-    department_name VARCHAR(128) UNIQUE,
-    department_no INT
+    department_name VARCHAR(128) UNIQUE NOT NULL,
+    department_no INT UNIQUE NOT NULL
 
 );
 
@@ -23,7 +23,7 @@ CREATE TABLE doctors (
 
 CREATE TABLE patients (
     id SERIAL PRIMARY KEY,
-    patient_id CHAR(10) UNIQUE,
+    patient_id CHAR(10) UNIQUE NOT NULL,
     name VARCHAR(128),
     age INT
 );
@@ -31,7 +31,7 @@ CREATE TABLE patients (
 
 CREATE TABLE medicines (
     id SERIAL PRIMARY KEY,
-    medicine_no CHAR(10) UNIQUE,
+    medicine_no CHAR(10) UNIQUE NOT NULL,
     name VARCHAR(128),
     description VARCHAR(128)
 );
