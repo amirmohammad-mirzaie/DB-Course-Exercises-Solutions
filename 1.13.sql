@@ -1,86 +1,63 @@
--- doctors related tables
-CREATE TABLE specialties (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE
-);
 
-CREATE TABLE doctors (
-    id SERIAL PRIMARY KEY,
-    doctor_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
-    name VARCHAR(128),
-    specialty_id INT REFERENCES specialties(id),
-    CONSTRAINT fk_doctor_specialty FOREIGN KEY (specialty_id) REFERENCES specialties(id),
-    -- TODO: to add indexing for the foreign keys
-    working_years INT
-);
+
 
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
-    department_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
+    department_id CHAR(10) UNIQUE,
     name VARCHAR(128),
-    type VARCHAR(64) CHECK (type IN ('surgery', 'medical'))
-    
+    type VARCHAR(16) CHECK (type IN ('surgery', 'treatment'))
 )
 
--- admission to the hospital
+
+CREATE TABLE doctors (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128),
+    doctor_id CHAR(10) UNIQUE,
+    expertise_domain VARCHAR(64),
+    n_experience_years INT
+)
+
 
 CREATE TABLE patients (
     id SERIAL PRIMARY KEY,
-    patient_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
-    
-    doctor_id INT REFERENCES doctors(id),
-    CONSTRAINT fk_patient_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id),
-    
+    patient_id CHAR(10) UNIQUE,
     name VARCHAR(128),
-    sex_type VARCHAR(16) CHECK (sex_type IN ('male', 'female')),
-    date_of_birth TIMESTAMP,
-    address VARCHAR(256)
-)
-
-
-CREATE TABLE admissions (
-    id SERIAL PRIMARY KEY,
-    admission_number VARCHAR(128) UNIQUE, -- assigned by the hospital itself
-    admission_date TIMESTAMP,
-    discharge_date TIMESTAMP,
-    patient_id INT REFERENCES patients(id),
-    CONSTRAINT fk_admission_patient FOREIGN KEY (patient_id) REFERENCES patients(id),
-
-
-    department_id INT REFERENCES departments(id),
-    CONSTRAINT fk_admission_department FOREIGN KEY (department_id) REFERENCES departments(id),
-    
-    
-    bed_id INT REFERENCES beds(id),
-    CONSTRAINT fk_admission_bed FOREIGN KEY (bed_id) REFERENCES beds(id)
-    
+    gender VARCHAR(8) CHECK (gender IN ('male', 'female')),
+    date_of_birth DATE,
+    address VARCHAR(1024)
 )
 
 
 CREATE TABLE beds (
     id SERIAL PRIMARY KEY,
-    type VARCHAR(64) CHECK (type IN ('electrical', 'simple')),
-    department_id INT REFERENCES departments(id),
-    CONSTRAINT fk_bed_department FOREIGN KEY (department_id) REFERENCES departments(id)
+    bed_no CHAR(10),
+    type VARCHAR(16) CHECK (type IN ('electrical', 'mechanical')),
+    department_id INT REFERENCES departments(id)
 )
 
-
-CREATE TABLE surgeries (
+CREATE TABLE admissions (
     id SERIAL PRIMARY KEY,
-    date TIMESTAMP,
+    admission_no CHAR(10) UNIQUE,
     patient_id INT REFERENCES patients(id),
-    CONSTRAINT fk_surgery_patient FOREIGN KEY (patient_id) REFERENCES patients(id)
-    
+    doctor_id INT REFERENCES doctors(id),
+    department_id INT REFERENCES departments(id),
+    admission_date DATE,
+    dismissal_date DATE,
+    bed_id INT REFERENCES beds(id)
 )
 
-CREATE TABLE junction_surgeries (
+CREATE TABLE surgery_info (
+    id SERIAL PRIMARY KEY,
+    admission_id INT REFERENCES admissions(id),
+    surgery_no CHAR(10),
+    surgery_date DATE,
+    surgery_hour TIME,
+    patient_id INT REFERENCES patients(id),
 
-    surgery_id INT REFERENCES surgeries(id),
-    CONSTRAINT fk_junction_surgery FOREIGN KEY (surgery_id) REFERENCES surgeries(id),
-    
+)
 
+CREATE TABLE surgery_participants (
     doctor_id INT REFERENCES doctors(id),
-    CONSTRAINT fk_junction_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id),
-    
-    PRIMARY KEY (surgery_id, doctor_id)
+    surgery_info_id INT REFERENCES surgery_info(id),
+    PRIMARY KEY(doctor_id, surgery_info_id)
 )
