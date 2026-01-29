@@ -1,7 +1,7 @@
 
 CREATE TABLE departments(
     id SERIAL PRIMARY KEY,
-    name VARCHAR(128),
+    name VARCHAR(128) UNIQUE
 )
 
 CREATE TABLE users(
@@ -14,100 +14,72 @@ CREATE TABLE users(
     
 )
 
--------------------------
--- Students related tables ----
--------------------------
-
-CREATE TABLE degrees (
-    id SERIAL PRIMARY KEY,
-    study_level VARCHAR(64),
-    degree_name VARCHAR(128),
-    department_id INT REFERENCES departments(id),
-    UNIQUE (study_level, department_id),
-    UNIQUE (degree_name, department_id)
-    
-)
-
+-- assuming a user can be student in different departments concurrently
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id),
-    degree_id INT REFERENCES degrees(id),
-    status VARCHAR(32) CHECK (status IN ('active', 'graduated', 'withdrawn', 'transferred')) DEFAULT 'active',
-    UNIQUE (user_id, degree_id)
-)
-
--------------------------
--- Graduated students related tables ----
--------------------------
-CREATE TABLE graduates (
-    id SERIAL PRIMARY KEY,
-    student_id INT REFERENCES students(id),
-    degree_id INT REFERENCES degrees(id),
+    department_id INT REFERENCES departments(id),
+    level VARCHAR(8) CHECK (level IN ('bsc', 'msc', 'phd'))
+    start_date DATE,
+    end_date DATE,
+    UNIQUE(user_id, department_id)
 )
 
 
-CREATE TABLE graduates_degrees (
-    graduate_id INT REFERENCES graduates(id),
-    degree_id INT REFERENCES degrees(id),
-    graduation_date TIMESTAMP,
-    PRIMARY KEY (graduate_id, degree_id)
-)
-
--------------------------
--- TA related tables ----
--------------------------
-
-CREATE TABLE teaching_assistants (
-    id SERIAL PRIMARY KEY,
-    student_id INT REFERENCES students(id),
-    course_title VARCHAR(256) NOT NULL
-)
-
-
-CREATE TABLE research_assistants (
-    id SERIAL PRIMARY KEY,
-    student_id INT REFERENCES students(id),
-    project_title VARCHAR(256) NOT NULL
-)
-
-
-
--------------------------
--- Employees related tables ----
--------------------------
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) UNIQUE,
-    salary FLOAT,
-    employee_type VARCHAR(64) CHECK (employee_type IN ('professor', 'staff'))
+    type VARCHAR(32) CHECK (type IN ('professor', 'staff', 'assistant')),
+    salary NUMERIC(15,2)
 )
 
-
--------------------------
--- Professors related tables ----
--------------------------
-CREATE TABLE professor_levels (
-    id SERIAL PRIMARY KEY,
-    level_name VARCHAR(64)
-);
 
 CREATE TABLE professors (
-    id INT SERIAL PRIMARY KEY,
-    employee_id INT REFERENCES employees(id),
-    level_id INT REFERENCES professor_levels(id)
+    id SERIAL PRIMARY KEY,
+    employee_id INT REFERENCES employees(id) UNIQUE,
+    level VARCHAR(32) CHECK (level IN ('entry_professor', 'mid_professor', 'full_professor'))
 )
 
 
--------------------------
--- staff related tables ----
--------------------------
-CREATE TABLE job_titles(
+CREATE TABLE staffs (
     id SERIAL PRIMARY KEY,
-    job_name VARCHAR(64)
-);
+    employee_id INT REFERENCES employees(id) UNIQUE,
+    job_title VARCHAR(64) NOT NULL,
 
-CREATE TABLE staff (
+)
+
+CREATE TABLE courses(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128),
+    department_id INT REFERENCES departments(id) ON DELETE CASCADE,
+    study_level VARCHAR(8) CHECK(study_level IN ('bsc', 'msc', 'phd')),
+    instructor_id INT REFERENCES professors(id)
+)
+-- teaching assistants are TAs that teach courses to students
+CREATE TABLE teaching_assistants (
     id SERIAL PRIMARY KEY,
     employee_id INT REFERENCES employees(id),
-    job_id INT REFERENCES job_titles(id)
+    student_id INT REFERENCES students(id),
+    course_id INT REFERENCES courses(id),
+    UNIQUE(student_id, course_id)
+)
+-- research assistants are TAs who work with a professor on a research topic
+CREATE TABLE research_assistants (
+    id SERIAL PRIMARY KEY,
+    employee_id INT REFERENCES employees(id),
+    student_id INT REFERENCES base_student(id),
+    professor_id INT REFERENCES professors(id),
+    research_topic VARCHAR(256),
+    UNIQUE(employee_id, student_id, professor_id)
+)
+
+
+CREATE TABLE graduates (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id)
+    date_received DATE,
+    degree_name VARCHAR(128),
+    department_id INT REFERENCES departments(id),
+    graduate_id INT REFERENCES graduates(id),
+    UNIQUE(user_id, department_id)
 )
