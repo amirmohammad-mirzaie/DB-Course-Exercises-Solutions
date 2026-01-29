@@ -43,8 +43,7 @@ CREATE TABLE admissions (
     medicine_id INT REFERENCES medicines(id),
     patient_id INT REFERENCES patients(id),
     doctor_id INT REFERENCES doctors(id),
-    department_id INT REFERENCES departments(id),
-    usage_type VARCHAR(8) CHECK (usage_type IN ('oral', 'injection'))
+    usage_type VARCHAR(8) CHECK (usage_type IN ('oral', 'injection')),
     n_daily_usage INT,
     start_date DATE,
     end_date DATE
