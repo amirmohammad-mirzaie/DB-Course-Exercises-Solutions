@@ -1,138 +1,51 @@
--- doctors related tables
-CREATE TABLE specialties (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE
-);
-
-
-CREATE TABLE doctors (
-    id SERIAL PRIMARY KEY,
-    doctor_number CHAR(64) UNIQUE, -- assigned by the hospital itself
-    name VARCHAR(128),
-    specialty_id INT REFERENCES specialties(id),
-    CONSTRAINT fk_doctor_specialty FOREIGN KEY (specialty_id) REFERENCES specialties(id),
-);
-
 
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
-    department_number CHAR(64) UNIQUE, -- assigned by the hospital itself
-    name VARCHAR(128),
-    type VARCHAR(64) CHECK (type IN ('surgery', 'medical'))
-);
+    name VARCHAR(128) UNIQUE
+)
 
-CREATE TABLE subdepartments (
+
+CREATE TABLE divisions (
     id SERIAL PRIMARY KEY,
-    department_id INT REFERENCES departments(id) ON DELETE CASCADE,
-    CONSTRAINT fk_sub_department_department FOREIGN KEY (department_id) REFERENCES departments(id)
-    -- TODO: To check whether we need to add the ON DELETE CASCADE to the constraint or not
-);
-
+    division_name INT UNIQUE,
+    department_id INT REFERENCES departments(id)
+)
 
 CREATE TABLE beds (
     id SERIAL PRIMARY KEY,
-    type VARCHAR(64) CHECK (type IN ('electrical', 'simple')),
-    sub_department_id INT REFERENCES subdepartments(id), -- TODO: To check if the sub department this bed belongs to is the same as the doctor who visited a patient
-    CONSTRAINT fk_bed_department FOREIGN KEY (sub_department_id) REFERENCES subdepartments(id)
-);
+    division_id INT REFERENCES divisions(id)
+)
 
--- each doctor can be in multiple sub departments and each subdepartment can have multiple doctors
-CREATE TABLE junction_doctor_subdepartments ( 
-    doctor_id INT REFERENCES doctors(id),
-    subdepartment_id INT REFERENCES subdepartments(id),
-    role VARCHAR(128),
-    start_date TIMESTAMP,
-    end_date TIMESTAMP,
-    PRIMARY KEY (doctor_id, subdepartment_id),
-    CHECK (start_date < end_date)
-
-);
+CREATE TABLE doctors (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128) UNIQUE
+)
 
 
 CREATE TABLE patients (
     id SERIAL PRIMARY KEY,
-    patient_number CHAR(64) UNIQUE, -- assigned by the hospital itself
-    doctor_id INT REFERENCES doctors(id),
-    bed_id INT REFERENCES beds(id) NULLABLE UNIQUE,
+    patient_id CHAR(10) UNIQUE,
     name VARCHAR(128),
-    sex_type VARCHAR(16) CHECK (sex_type IN ('male', 'female')),
-    date_of_birth TIMESTAMP,
-    address VARCHAR(256),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_patient_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id),
-);
-
-CREATE TABLE illnesses (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(128)
-);
-
-
-
-CREATE TABLE patient_diagnoses (
-    id SERIAL PRIMARY KEY,  
-    patient_id INT REFERENCES patients(id),
-    illness_id INT REFERENCES illnesses(id),
-
+    department_id INT REFERENCES departments(id) -- this is intentionally added since it also can be fetched from the corresponding bed
+    division_id INT REFERENCES divisions(id), -- this is intentionally added since it also can be fetched from the corresponding bed
+    bed_id INT REFERENCES beds(id)
 )
 
 CREATE TABLE medicines (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(128),
-    summary TEXT
+    medicine_no INT,
+    name VARCHAR(16),
+    description VARCHAR(128)
+
+    )
+
+CREATE TABLE admissions (
+    medicine_id INT REFERENCES medicines(id),
+    dosage VARCHAR(64),
+    usage_type VARCHAR(8) CHECK (usage_type IN ('mouth', 'muscle'))
+    n_daily_usage INT,
+    start_date DATE,
+    end_date DATE
 )
 
 
-CREATE TABLE prescriptions (
-    id SERIAL PRIMARY KEY,
-    patient_id INT REFERENCES patients(id) NOT NULL,
-    medicine_id INT REFERENCES medicines(id) NOT NULL,
-    doctor_id INT REFERENCES doctors(id) NOT NULL,
-    reason VARCHAR(256),
-    doses_per_day INT,
-    amount NUMERIC(5,2),
-    dosage_unit VARCHAR(64), -- for example mg, ml, tablet
-    type VARCHAR(64) CHECK (type IN ('intramuscular', 'oral'))
-    start_date TIMESTAMP,
-    end_date TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CHECK (start_date < end_date)
-)
-
-
-CREATE TABLE intakes (
-    id SERIAL PRIMARY KEY,
-    prescription_id INT REFERENCES prescriptions(id),
-    administered_at TIMESTAMP,
-    administered_by INT REFERENCES doctors(id),
-    amount_given NUMERIC(5,2), -- TODO: to check the amount_given <= amount for the parent prescription
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    
-)
-
-CREATE OR REPLACE FUNCTION check_intake_date()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.administered_at < (SELECT start_date FROM prescriptions WHERE id = NEW.prescription_id)
-       OR NEW.administered_at > (SELECT end_date FROM prescriptions WHERE id = NEW.prescription_id)
-    THEN
-        RAISE EXCEPTION 'Intake date must be between prescription start and end dates.';
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_check_intake_date
-BEFORE INSERT OR UPDATE ON intakes
-FOR EACH ROW
-EXECUTE FUNCTION check_intake_date();
-
-
--- TODO: To set constraints for checking if the bed id is in the sub department id
--- TODO: TO set constraints for checking the sub department is inside a department
--- TODO: TO add indices for the primary keys and foreign keys
--- TODO: To add a check that validates the intakes is between the start date and the end date for a prescription
