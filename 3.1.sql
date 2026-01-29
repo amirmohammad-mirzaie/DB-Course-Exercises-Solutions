@@ -33,14 +33,16 @@ CREATE TABLE patients (
 
 CREATE TABLE medicines (
     id SERIAL PRIMARY KEY,
-    medicine_no INT,
+    medicine_no CHAR(10) UNIQUE,
     name VARCHAR(16),
     description VARCHAR(128)
 
     )
 
 CREATE TABLE admissions (
+    id SERIAL PRIMARY KEY,
     medicine_id INT REFERENCES medicines(id),
+    patient_id INT REFERENCES patients(id),
     dosage VARCHAR(64),
     usage_type VARCHAR(8) CHECK (usage_type IN ('mouth', 'muscle'))
     n_daily_usage INT,
