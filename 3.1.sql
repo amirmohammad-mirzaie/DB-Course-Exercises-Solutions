@@ -25,20 +25,29 @@ CREATE TABLE patients (
     id SERIAL PRIMARY KEY,
     patient_id CHAR(10) UNIQUE,
     name VARCHAR(128),
-    age INT,
-    department_id INT REFERENCES departments(id), -- this is intentionally added since it also can be fetched from the corresponding bed)
+    age INT
 );
 
 
 CREATE TABLE medicines (
     id SERIAL PRIMARY KEY,
     medicine_no CHAR(10) UNIQUE,
-    name VARCHAR(16),
+    name VARCHAR(128),
     description VARCHAR(128),
     dosage_mg_ml NUMERIC(5,2)
 );
 
 CREATE TABLE admissions (
+    id SERIAL PRIMARY KEY,
+    patient_id INT REFERENCES patients(id),
+    doctor_id INT REFERENCES doctors(id),
+    admission_date DATE,
+    dismissal_date DATE
+
+)
+
+
+CREATE TABLE prescriptions (
     id SERIAL PRIMARY KEY,
     medicine_id INT REFERENCES medicines(id),
     patient_id INT REFERENCES patients(id),
@@ -48,5 +57,3 @@ CREATE TABLE admissions (
     start_date DATE,
     end_date DATE
 )
-
-
