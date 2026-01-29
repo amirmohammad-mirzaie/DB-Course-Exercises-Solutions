@@ -1,9 +1,9 @@
 
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
-    department_name VARCHAR(128),
-    department_no INT,
-    UNIQUE (department_name, department_no)
+    department_name VARCHAR(128) UNIQUE,
+    department_no INT
+
 );
 
 
@@ -16,7 +16,7 @@ CREATE TABLE beds (
 
 CREATE TABLE doctors (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE,
+    name VARCHAR(128),
     department_id INT REFERENCES departments(id)
 );
 
@@ -33,14 +33,14 @@ CREATE TABLE medicines (
     id SERIAL PRIMARY KEY,
     medicine_no CHAR(10) UNIQUE,
     name VARCHAR(128),
-    description VARCHAR(128),
-    dosage_mg_ml NUMERIC(5,2)
+    description VARCHAR(128)
 );
 
 CREATE TABLE admissions (
     id SERIAL PRIMARY KEY,
     patient_id INT REFERENCES patients(id),
     doctor_id INT REFERENCES doctors(id),
+    bed_id INT REFERENCES beds(id),
     admission_date DATE,
     dismissal_date DATE
 
@@ -49,10 +49,10 @@ CREATE TABLE admissions (
 
 CREATE TABLE prescriptions (
     id SERIAL PRIMARY KEY,
+    admission_id INT REFERENCES admissions(id),
     medicine_id INT REFERENCES medicines(id),
-    patient_id INT REFERENCES patients(id),
-    doctor_id INT REFERENCES doctors(id),
-    usage_type VARCHAR(8) CHECK (usage_type IN ('oral', 'injection')),
+    usage_type VARCHAR(16) CHECK (usage_type IN ('oral', 'injection')),
+    dosage_mg_ml NUMERIC(5,2),
     n_daily_usage INT,
     start_date DATE,
     end_date DATE
